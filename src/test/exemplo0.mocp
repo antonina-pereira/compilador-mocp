@@ -1,0 +1,6 @@
+/* Exemplo de condição */
+se (x > y) {
+y = x;
+} senao {
+x = y;
+}

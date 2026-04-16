@@ -1,0 +1,12 @@
+/* para ler uma string ou caráter, tem de usar lers() ou lerc() */
+c = lerc(); /* se for um inteiro, lê apenas um caráter */
+s = lers(); /* se for um vetor, lê a string toda */
+/* os valores lidos são convertidos no código ASCII, o enter é transformado em 0 */
+/* para escrever no ecrã existem as funções escrever() e escreverc(), para variáveis
+simples, escreverv() para vetores e escrevers() para strings */
+/* Exemplo v = {97,89,99,0} */
+escrever(v[0]); /* escreve: 97 */escreverc(v[0]); /* escreve: a */
+escreverv(v);/* escreve: {97,89,99,0} */
+escrevers(v);/* escreve: abc */
+/* escrevers() também pode ser usado para escrever uma string literal */
+escrevers("Hello, World!"); /* muda de linha após a string */

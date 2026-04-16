@@ -1,0 +1,6 @@
+/* Exemplo de condição com erro: */
+se (x > y) {
+y = x;
+} senao {
+x = y;
+}
