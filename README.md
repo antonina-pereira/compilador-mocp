@@ -10,8 +10,6 @@ make
 Este passo vai criar a pasta build e a pasta src/generated com os seguintes ficheiros:
 -`MOCPLexer.java`
 -`MOCPParser.java`
--`MCOPBaseVisitor.java`
--`MOCPVisitor.java`
 
 ### Passo 2
 Correr o programa sobre um ficheiro MOCP usando como exemplo o ficheiro de teste `exemplo0.mocp`:
