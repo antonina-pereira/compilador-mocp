@@ -24,7 +24,7 @@ public class Main {
     MOCPParser parser = new MOCPParser(tokens);
 
     // Gerar a parse tree
-    ParseTree tree = parser.program();
+    ParseTree tree = parser.programa();
 
     // Imprimir a árvore sintática abstrata
     System.out.println(tree.toStringTree(parser));

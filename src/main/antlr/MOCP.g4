@@ -1,21 +1,138 @@
 grammar MOCP;
 
-program
-    : statement* EOF
-    ;
-
-statement
-    : expr ';'
-    ;
-
-expr
-    : NUMBER
-    | ID
-    ;
-
 /* Parser Rules */
 
-/* TODO */
+// Programa
+programa
+  : (declaracao
+  | definicaoFuncao
+  | afirmacao
+  )* EOF
+  ;
+
+// Especificação dos tipos
+especificadorTipo
+  : INTEIRO
+  | REAL
+  | VAZIO
+  ;
+
+// Declaração
+declaracao
+  : especificadorTipo listaDeclarador SEMIVIRGULA
+  ;
+
+listaDeclarador
+  : declarador (VIRGULA declarador)*
+  ;
+
+declarador
+  : ID (ECOLCHETE NUM_INTEIRO DCOLCHETE)* (ATRIBUIR expressao)?
+  ;
+
+// Definição de funções
+definicaoFuncao
+  : especificadorTipo ID EPAREN listaParametro? DPAREN afirmacaoComposta
+  ;
+
+// Chamada de funções
+chamadaFuncao
+  : ID EPAREN listaParametro? DPAREN
+  ;
+
+listaParametro
+  : parametro (VIRGULA parametro)*
+  ;
+
+parametro
+  : especificadorTipo ID
+  ;
+
+// Afirmações
+afirmacao
+  : afirmacaoExpressao
+  | afirmacaoComposta
+  | afirmacaoSe
+  | afirmacaoEnquanto
+  | afirmacaoPara
+  | afirmacaoRetornar
+  ;
+
+afirmacaoExpressao
+  : expressao? SEMIVIRGULA
+  ;
+
+afirmacaoComposta
+  : ECHAVE (declaracao | afirmacao)* DCHAVE
+  ;
+
+afirmacaoSe
+  : SE EPAREN expressao DPAREN afirmacaoComposta (SENAO afirmacaoComposta)?
+  ;
+
+afirmacaoEnquanto
+  : ENQUANTO EPAREN expressao DPAREN ECHAVE afirmacaoComposta DCHAVE
+  ;
+
+afirmacaoPara
+  : PARA EPAREN ID ATRIBUIR INTEIRO SEMIVIRGULA ID (MAIOR | MENOR) SEMIVIRGULA ID ATRIBUIR ID MAIS INTEIRO DPAREN afirmacaoComposta
+  ;
+
+afirmacaoRetornar
+  : RETORNAR expressao? SEMIVIRGULA
+  ;
+
+// Expressões
+expressao
+  : expressaoAtribuir
+  ;
+
+expressaoAtribuir
+  : expressaoOULogica (ATRIBUIR expressaoAtribuir)?
+  ;
+
+expressaoOULogica
+  : expressaoELogica (OU expressaoELogica)*
+  ;
+
+expressaoELogica
+  : expressaoIgualdade (E expressaoIgualdade)*
+  ;
+
+expressaoIgualdade
+  : expressaoRelacional ((IGUAL | DIFERENTE) expressaoRelacional)*
+  ;
+
+expressaoRelacional
+  : expressaoAditiva ((MAIOR | MENOR | MAIOR_IGUAL | MENOR_IGUAL) expressaoAditiva)*
+  ;
+
+expressaoAditiva
+  : expressaoMultiplicativa ((MAIS | MENOS) expressaoMultiplicativa)*
+  ;
+
+expressaoMultiplicativa
+  : expressaoUnaria ((MULT | DIV | MODULO) expressaoUnaria)*
+  ;
+
+expressaoUnaria
+  : NAO expressaoUnaria
+  | MENOS expressaoUnaria
+  | EPAREN especificadorTipo DPAREN expressaoUnaria
+  | expressaoVetor
+  ;
+
+expressaoVetor
+  : expressaoSimples (ECOLCHETE expressao DCOLCHETE)*
+  ;
+
+expressaoSimples
+  : ID
+  | NUM_INTEIRO
+  | NUM_REAL
+  | EPAREN expressao DPAREN
+  | chamadaFuncao
+  ;
 
 /* Lexer Rules */
 
@@ -25,13 +142,17 @@ NUM_INTEIRO : DIGITO+ ; // representa números inteiros
 
 NUM_REAL : NUM_INTEIRO '.' NUM_INTEIRO ; // representa números decimais até 15 dígitos de precisão
 
-NOVALINHA : '\r'? '\n' ;
+ESPACOBRANCO
+  : [ \t\r\n\f]+ -> skip
+  ;
 
-ESPACOBRANCO : [ \t\r\n\f]+ -> skip ;
+COMENTARIO_LINHA
+  : '//' ~[\r\n]* -> skip
+  ;
 
-COMENTARIO_LINHA : '//' ~[\r\n]* ;
-
-COMENTARIO_BLOCO : '/*' .*? '*/' ;
+COMENTARIO_BLOCO
+  : '/*' .*? '*/' -> skip
+  ;
 
 // Operadores
 ATRIBUIR : '=' ;
