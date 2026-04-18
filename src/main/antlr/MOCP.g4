@@ -32,12 +32,12 @@ declarador
 
 // Definição de funções
 definicaoFuncao
-  : especificadorTipo ID EPAREN listaParametro? DPAREN afirmacaoComposta
+  : especificadorTipo ID EPAREN listaParametro? DPAREN afirmacaoComposta?
   ;
 
 // Chamada de funções
 chamadaFuncao
-  : ID EPAREN listaParametro? DPAREN
+  : ID EPAREN listaArgumento? DPAREN
   ;
 
 listaParametro
@@ -45,7 +45,11 @@ listaParametro
   ;
 
 parametro
-  : especificadorTipo ID
+  : especificadorTipo ID* (ECOLCHETE NUM_INTEIRO? DCOLCHETE)*
+  ;
+
+listaArgumento
+  : expressao (VIRGULA expressao)*
   ;
 
 // Afirmações
@@ -71,11 +75,11 @@ afirmacaoSe
   ;
 
 afirmacaoEnquanto
-  : ENQUANTO EPAREN expressao DPAREN ECHAVE afirmacaoComposta DCHAVE
+  : ENQUANTO EPAREN expressao DPAREN afirmacaoComposta
   ;
 
 afirmacaoPara
-  : PARA EPAREN ID ATRIBUIR INTEIRO SEMIVIRGULA ID (MAIOR | MENOR) SEMIVIRGULA ID ATRIBUIR ID MAIS INTEIRO DPAREN afirmacaoComposta
+  : PARA EPAREN expressao? SEMIVIRGULA expressao? SEMIVIRGULA expressao? DPAREN afirmacaoComposta
   ;
 
 afirmacaoRetornar
@@ -130,6 +134,7 @@ expressaoSimples
   : ID
   | NUM_INTEIRO
   | NUM_REAL
+  | STRING
   | EPAREN expressao DPAREN
   | chamadaFuncao
   ;
@@ -141,6 +146,10 @@ fragment DIGITO : [0-9] ;
 NUM_INTEIRO : DIGITO+ ; // representa números inteiros
 
 NUM_REAL : NUM_INTEIRO '.' NUM_INTEIRO ; // representa números decimais até 15 dígitos de precisão
+
+STRING
+  : '"' (~["\\] | '\\' .)* '"'
+  ;
 
 ESPACOBRANCO
   : [ \t\r\n\f]+ -> skip
