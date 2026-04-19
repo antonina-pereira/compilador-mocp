@@ -1,0 +1,4 @@
+/* Exemplo de ciclo para: */
+par (i = 0; i < 10; i = i + 1) {
+x = x + i;
+}

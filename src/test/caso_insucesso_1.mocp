@@ -1,0 +1,4 @@
+/* Exemplo de ciclo enquanto: */
+enquanto (x > 0} {
+x = x - 10;
+}
