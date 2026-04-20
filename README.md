@@ -7,14 +7,12 @@ Na raiz do projeto, executar:
 ```
 make
 ```
-Este passo vai criar a pasta build e a pasta src/generated com os seguintes ficheiros:
--`MOCPLexer.java`
--`MOCPParser.java`
+Este passo vai criar a pasta build e a pasta src/generated e gerar os ficheiros necessários para correr o programa.
 
 ### Passo 2
-Correr o programa sobre um ficheiro MOCP usando como exemplo o ficheiro de teste `exemplo0.mocp`:
+Correr o programa sobre um ficheiro MOCP usando como exemplo o ficheiro de teste `caso_sucesso_0.mocp`:
 ```
-make run FILE=src/test/exemplo0.mocp
+make run FILE=src/test/caso_sucesso.mocp
 ```
 ### Limpar os ficheiros gerados
 ```
@@ -22,7 +20,7 @@ make clean
 ```
 
 ### Resultado
-O programa lê o ficheiro `.mocp` e imprime a árvore sintática no terminal.
+O programa lê o ficheiro `.mocp` e imprime a árvore sintática no terminal. Ou imprime os erros encontrados.
 
 > [!NOTE]
 > ANTLR deve estar instalado e acessível usando o comando `antlr4`.
@@ -36,10 +34,10 @@ A utilização das palavras-chave da linguagem C original (como int, if, else, w
 etc.) constitui erro sintático.
 A MOCP é a linguagem C simplificada, mas com palavras-chave e funções em português,
 mantendo as mesmas regras e restrições.
--Não existem diretivas # (como #include).
--Apenas existem os tipos inteiro e real.
--As variáveis podem ser simples ou vetores.
--Inteiros podem representar caracteres (ASCII).
--Vetores de inteiros podem representar strings (terminadas em 0).
--Os comentários são o habitual do C.
--Os operadores são mesmo da linguagem C.
+Não existem diretivas # (como #include).
+Apenas existem os tipos inteiro e real.
+As variáveis podem ser simples ou vetores.
+Inteiros podem representar caracteres (ASCII).
+Vetores de inteiros podem representar strings (terminadas em 0).
+Os comentários são o habitual do C.
+Os operadores são mesmo da linguagem C.

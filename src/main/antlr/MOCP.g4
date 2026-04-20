@@ -45,7 +45,7 @@ listaParametro
   ;
 
 parametro
-  : especificadorTipo ID* (ECOLCHETE NUM_INTEIRO? DCOLCHETE)*
+  : especificadorTipo ID? (ECOLCHETE NUM_INTEIRO? DCOLCHETE)*
   ;
 
 listaArgumento
@@ -143,14 +143,16 @@ expressaoSimples
 
 fragment DIGITO : [0-9] ;
 
-NUM_INTEIRO : DIGITO+ ; // representa números inteiros
+NUM_INTEIRO : DIGITO+ ; // Representa números inteiros
 
-NUM_REAL : NUM_INTEIRO '.' NUM_INTEIRO ; // representa números decimais até 15 dígitos de precisão
+NUM_REAL : NUM_INTEIRO '.' NUM_INTEIRO ; // Representa números decimais
 
+// Um string é reconhecido como uma sequência de caracteres entre aspas
 STRING
   : '"' (~["\\] | '\\' .)* '"'
   ;
 
+// Espaço em branco e comentários são saltados
 ESPACOBRANCO
   : [ \t\r\n\f]+ -> skip
   ;
@@ -166,19 +168,19 @@ COMENTARIO_BLOCO
 // Operadores
 ATRIBUIR : '=' ;
 
-// operadores aritméticos
+// Operadores aritméticos
 MAIS : '+' ;
 MENOS : '-' ;
 MULT : '*' ;
 DIV : '/' ;
 MODULO : '%' ;
 
-// operadores lógicos
+// Operadores lógicos
 E : '&&' ;
 OU : '||' ;
 NAO : '!' ;
 
-// operadores relacionais
+// Operadores relacionais
 MENOR : '<' ;
 MAIOR : '>' ;
 MENOR_IGUAL : '<=' ;
@@ -210,6 +212,6 @@ ENQUANTO : 'enquanto' ;
 PARA : 'para' ;
 RETORNAR : 'retornar' ;
 
-ID : [a-zA-Z_] [a-zA-Z0-9_]* ;
+ID : [a-zA-Z_] [a-zA-Z0-9_]* ; // Identificadores
 
 ANY : . ; // regra catch-all
