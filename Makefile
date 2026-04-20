@@ -3,6 +3,7 @@ ANTLR_JAR := $(firstword \
     $(wildcard antlr-4.*-complete.jar) \
     $(wildcard /usr/local/lib/antlr-4.*-complete.jar) \
     $(wildcard /usr/share/java/antlr-4.*-complete.jar) \
+    $(wildcard /opt/homebrew/Cellar/antlr/*/antlr-4.*-complete.jar) \
 )
 
 ifeq ($(ANTLR_JAR),)

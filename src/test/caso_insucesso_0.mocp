@@ -1,5 +1,8 @@
-/* Exemplo de condição com erro: */
+/* Exemplo com dois erros:
+   1. Erro léxico: o caráter '@' não pertence ao alfabeto da linguagem MOCP.
+      O lexer não reconhece '@' como token válido — é capturado pela regra ANY.
+   2. Erro sintático: a chaveta '}' de fecho do bloco 'senao' está em falta. */
 se (x > y) {
 y = x;
 } senao {
-x = y;
+x = @y; /* erro léxico: '@' é um caráter inválido em MOCP */
