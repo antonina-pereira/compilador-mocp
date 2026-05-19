@@ -9,6 +9,10 @@ public class OpUnNode extends ASTNode {
         this.expressao = expressao;
     }
 
+    public ASTNode getExpressao() {
+        return expressao;
+    }
+
     @Override
     public void print(String indent) {
         System.out.println(indent + "OpUnaria (" + operador + ")");

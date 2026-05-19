@@ -9,6 +9,14 @@ public class AcessoVetorNode extends ASTNode {
         this.indice = indice;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public ASTNode getIndice() {
+        return indice;
+    }
+
     @Override
     public void print(String indent) {
         System.out.println(indent + "Acesso Vetor: " + id);

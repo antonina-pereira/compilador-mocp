@@ -14,9 +14,7 @@ public class TACGenerator {
         System.out.println("\n--- A INICIAR GERAÇÃO DE CÓDIGO INTERMÉDIO (TAC) ---");
         if (programa instanceof ProgramaNode) {
             for (ASTNode elem : ((ProgramaNode) programa).getFilhos()) {
-                if (elem instanceof FuncaoNode) {
-                    gerarFuncao((FuncaoNode) elem);
-                }
+                if (elem instanceof FuncaoNode) gerarFuncao((FuncaoNode) elem);
             }
         }
         imprimirInstrucoes();
@@ -24,45 +22,32 @@ public class TACGenerator {
     }
 
     private void gerarFuncao(FuncaoNode func) {
-        emit(new RotuloInstr(func.getNome())); // rotulo:
+        emit(new RotuloInstr(func.getNome()));
         gerarElemento(func.getBloco());
     }
 
     private void gerarComposta(AfirmacaoCompostaNode bloco) {
         if (bloco == null) return;
-        for (ASTNode elem : bloco.getInstrucoes()) {
-            gerarElemento(elem);
-        }
+        for (ASTNode elem : bloco.getInstrucoes()) gerarElemento(elem);
     }
 
     private void gerarElemento(ASTNode no) {
         if (no == null) return;
-
-        if (no instanceof DeclaracaoNode) {
-            gerarDeclaracao((DeclaracaoNode) no);
-        } else if (no instanceof AfirmacaoCompostaNode) {
-            gerarComposta((AfirmacaoCompostaNode) no);
-        } else if (no instanceof SeNode) {
-            gerarSe((SeNode) no);
-        } else if (no instanceof RetornarNode) {
-            gerarRetornar((RetornarNode) no);
-        } else if (no instanceof ParaNode) { // ADICIONAR ESTA LINHA!
-            gerarPara((ParaNode) no);
-        } else if (no instanceof OpBinNode) {
-            gerarExpressao(no);
-        }
-        // Nota: EnquantoNode e ParaNode podem ser adicionados aqui usando os respetivos getters!
+        if (no instanceof DeclaracaoNode) gerarDeclaracao((DeclaracaoNode) no);
+        else if (no instanceof AfirmacaoCompostaNode) gerarComposta((AfirmacaoCompostaNode) no);
+        else if (no instanceof SeNode) gerarSe((SeNode) no);
+        else if (no instanceof EnquantoNode) gerarEnquanto((EnquantoNode) no);
+        else if (no instanceof RetornarNode) gerarRetornar((RetornarNode) no);
+        else if (no instanceof ParaNode) gerarPara((ParaNode) no);
+        else if (no instanceof OpBinNode) gerarExpressao(no);
     }
-
-
 
     private void gerarDeclaracao(DeclaracaoNode decl) {
         for (ASTNode item : decl.getItens()) {
             if (item instanceof DeclaradorNode) {
                 DeclaradorNode d = (DeclaradorNode) item;
                 if (d.getInicializador() != null) {
-                    String val = gerarExpressao(d.getInicializador());
-                    emit(new AtribuirInstr(d.getId(), val));
+                    emit(new AtribuirInstr(d.getId(), gerarExpressao(d.getInicializador())));
                 }
             }
         }
@@ -72,79 +57,64 @@ public class TACGenerator {
         String cond = gerarExpressao(no.getCondicao());
         String rotSenao = labels.newLabel();
         emit(new SeFalsoInstr(cond, rotSenao));
-
-        gerarComposta((AfirmacaoCompostaNode) no.getBlocoSe());
-
+        gerarElemento(no.getBlocoSe());
         if (no.getBlocoSenao() != null) {
             String rotFim = labels.newLabel();
             emit(new VaiParaInstr(rotFim));
             emit(new RotuloInstr(rotSenao));
-            gerarComposta((AfirmacaoCompostaNode) no.getBlocoSenao());
+            gerarElemento(no.getBlocoSenao());
             emit(new RotuloInstr(rotFim));
         } else {
             emit(new RotuloInstr(rotSenao));
         }
     }
 
-    private void gerarPara(ParaNode no) {
-        // 1. Usa os métodos públicos getInit(), getCondicao(), getCorpo(), getIncremento()
-        if (no.getInit() != null) {
-            gerarExpressao(no.getInit());
-        }
-
+    private void gerarEnquanto(EnquantoNode no) {
         String rotInicio = labels.newLabel();
         String rotFim = labels.newLabel();
-
-        // 2. Coloca o rótulo de início do ciclo
         emit(new RotuloInstr(rotInicio));
-
-        // 3. Avalia a condição usando o getter
-        if (no.getCondicao() != null) {
-            String cond = gerarExpressao(no.getCondicao());
-            emit(new SeFalsoInstr(cond, rotFim));
-        }
-
-        // 4. Executa o corpo usando o getter
-        if (no.getCorpo() != null) {
-            gerarElemento(no.getCorpo());
-        }
-
-        // 5. Executa o incremento usando o getter
-        if (no.getIncremento() != null) {
-            gerarExpressao(no.getIncremento());
-        }
-
-        // 6. Salta de volta para o início
+        emit(new SeFalsoInstr(gerarExpressao(no.getCondicao()), rotFim));
+        gerarElemento(no.getCorpo());
         emit(new VaiParaInstr(rotInicio));
+        emit(new RotuloInstr(rotFim));
+    }
 
-        // 7. Coloca o rótulo de fim do ciclo
+    private void gerarPara(ParaNode no) {
+        if (no.getInit() != null) gerarExpressao(no.getInit());
+        String rotInicio = labels.newLabel();
+        String rotFim = labels.newLabel();
+        emit(new RotuloInstr(rotInicio));
+        if (no.getCondicao() != null) emit(new SeFalsoInstr(gerarExpressao(no.getCondicao()), rotFim));
+        if (no.getCorpo() != null) gerarElemento(no.getCorpo());
+        if (no.getIncremento() != null) gerarExpressao(no.getIncremento());
+        emit(new VaiParaInstr(rotInicio));
         emit(new RotuloInstr(rotFim));
     }
 
     private void gerarRetornar(RetornarNode no) {
-        String val = no.getExpressao() != null ? gerarExpressao(no.getExpressao()) : null;
-        emit(new RetornaInstr(val));
+        emit(new RetornaInstr(no.getExpressao() != null ? gerarExpressao(no.getExpressao()) : null));
     }
 
-    // Devolve o temporário (t1, t2) ou o ID (x, y) da expressão
     private String gerarExpressao(ASTNode no) {
         if (no == null) return null;
-
-        if (no instanceof IDNode) {
-            return ((IDNode) no).getNome();
+        if (no instanceof IDNode) return ((IDNode) no).getNome();
+        if (no instanceof LiteralIntNode) return ((LiteralIntNode) no).getValor();
+        if (no instanceof LiteralRealNode) return ((LiteralRealNode) no).getValor();
+        if (no instanceof OpUnNode) return gerarExpressao(((OpUnNode) no).getExpressao());
+        if (no instanceof ChamadaFuncaoNode) {
+            ChamadaFuncaoNode call = (ChamadaFuncaoNode) no;
+            for (ASTNode arg : call.getArgumentos()) emit(new ParamInstr(gerarExpressao(arg)));
+            String temp = temps.newTemp();
+            emit(new ChamarInstr(temp, call.getNome(), call.getArgumentos().size()));
+            return temp;
         }
-        if (no instanceof OpBinNode) {
-            return gerarOpBin((OpBinNode) no);
+        if (no instanceof AcessoVetorNode) {
+            AcessoVetorNode vet = (AcessoVetorNode) no;
+            String temp = temps.newTemp();
+            emit(new VetorCarregarInstr(temp, vet.getId(), gerarExpressao(vet.getIndice())));
+            return temp;
         }
-
-        // Ajustado para classe LiteralIntNode
-        if (no instanceof LiteralIntNode) {
-            return ((LiteralIntNode) no).getValor();
-        }
-        if (no instanceof LiteralRealNode) {
-            return ((LiteralRealNode) no).getValor();
-        }
-
+        if (no instanceof OpBinNode) return gerarOpBin((OpBinNode) no);
         return null;
     }
 
@@ -152,29 +122,23 @@ public class TACGenerator {
         if (no.getOperador().equals("=")) {
             String dir = gerarExpressao(no.getDireita());
             if (no.getEsquerda() instanceof IDNode) {
-                String dest = ((IDNode) no.getEsquerda()).getNome();
-                emit(new AtribuirInstr(dest, dir));
-                return dest;
+                emit(new AtribuirInstr(((IDNode) no.getEsquerda()).getNome(), dir));
+                return ((IDNode) no.getEsquerda()).getNome();
+            } else if (no.getEsquerda() instanceof AcessoVetorNode) {
+                AcessoVetorNode vet = (AcessoVetorNode) no.getEsquerda();
+                emit(new VetorGuardarInstr(vet.getId(), gerarExpressao(vet.getIndice()), dir));
+                return dir;
             }
-            return dir;
         }
-        // Expressão Matemática/Lógica: t1 = esq + dir
-        String esq = gerarExpressao(no.getEsquerda());
-        String dir = gerarExpressao(no.getDireita());
         String dest = temps.newTemp();
-        emit(new OpBinInstr(dest, esq, no.getOperador(), dir));
+        emit(new OpBinInstr(dest, gerarExpressao(no.getEsquerda()), no.getOperador(), gerarExpressao(no.getDireita())));
         return dest;
     }
 
-    private void emit(Instruction instr) {
-        instrucoes.add(instr);
-    }
-
+    private void emit(Instruction instr) { instrucoes.add(instr); }
     public void imprimirInstrucoes() {
         System.out.println("---------------------------------------------------");
-        for (Instruction i : instrucoes) {
-            System.out.println(i.toString());
-        }
+        for (Instruction i : instrucoes) System.out.println(i.toString());
         System.out.println("---------------------------------------------------");
     }
 }

@@ -1,26 +1,28 @@
 package mocp.ast;
 
 public class EnquantoNode extends ASTNode {
-    private ASTNode condicao;
-    private ASTNode bloco;
+    private final ASTNode condicao;
+    private final ASTNode corpo;
 
-    public void setCondicao(ASTNode condicao) {
+    public EnquantoNode(ASTNode condicao, ASTNode corpo) {
         this.condicao = condicao;
+        this.corpo = corpo;
     }
 
-    public void setBloco(ASTNode bloco) {
-        this.bloco = bloco;
+    // ADICIONA ESTES MÉTODOS:
+    public ASTNode getCondicao() {
+        return condicao;
     }
+
+    public ASTNode getCorpo() {
+        return corpo;
+    }
+
 
     @Override
     public void print(String indent) {
         System.out.println(indent + "Loop ENQUANTO");
-        if (condicao != null) {
-            System.out.print(indent + "  Condicao: ");
-            condicao.print("");
-        }
-        if (bloco != null) {
-            bloco.print(indent + "  ");
-        }
+        if (condicao != null) condicao.print(indent + "  Condicao: ");
+        if (corpo != null) corpo.print(indent + "  Bloco: ");
     }
 }

@@ -29,7 +29,12 @@ public class SeNode extends ASTNode {
     public ASTNode getBlocoSenao() {
         return blocoSenao;
     }
-    // --------------------------------------------
+
+    public SeNode(ASTNode condicao, ASTNode blocoSe, ASTNode blocoSenao) {
+        this.condicao = condicao;
+        this.blocoSe = blocoSe;
+        this.blocoSenao = blocoSenao;
+    }
 
     @Override
     public void print(String indent) {

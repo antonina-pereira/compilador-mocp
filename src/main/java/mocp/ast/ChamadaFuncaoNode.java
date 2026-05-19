@@ -15,6 +15,16 @@ public class ChamadaFuncaoNode extends ASTNode {
         if (arg != null) argumentos.add(arg);
     }
 
+    // MÉTODOS ADICIONADOS PARA O TACGenerator:
+
+    public String getNome() {
+        return nome;
+    }
+
+    public List<ASTNode> getArgumentos() {
+        return argumentos;
+    }
+
     @Override
     public void print(String indent) {
         System.out.println(indent + "Chamada Funcao: " + nome);

@@ -31,6 +31,13 @@ public class ParaNode extends ASTNode {
         return this.bloco;
     }
 
+    public ParaNode(ASTNode init, ASTNode cond, ASTNode inc, ASTNode bloco) {
+        this.inicializacao = init;
+        this.condicao = cond;
+        this.incremento = inc;
+        this.bloco = bloco;
+    }
+
     @Override
     public void print(String indent) {
         System.out.println(indent + "Loop PARA");
