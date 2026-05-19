@@ -27,6 +27,7 @@ public class SemanticAnalyzer {
     // -------------------------------------------------------------------------
 
     public void analisar(ProgramaNode programa) {
+        registarBuiltins();
         // Passo 1 — registar todos os símbolos de topo
         for (ASTNode elem : programa.elementos) {
             if (elem instanceof DeclaracaoNode) {
@@ -52,6 +53,24 @@ public class SemanticAnalyzer {
 
     public List<String> getErros() {
         return erros;
+    }
+
+    // -------------------------------------------------------------------------
+    // Funções integradas (built-ins)
+    // -------------------------------------------------------------------------
+
+    private void registarBuiltins() {
+        // Regista com 0 parâmetros para que a verificação de nArgs seja ignorada
+        registarBuiltin("ler",      "inteiro");
+        registarBuiltin("lerr",     "real");
+        registarBuiltin("lers",     "inteiro");  // lê string/vetor, devolve tamanho
+        registarBuiltin("escrever", "vazio");
+        registarBuiltin("escrevers","vazio");
+        registarBuiltin("escreverr","vazio");
+    }
+
+    private void registarBuiltin(String nome, String tipo) {
+        escopo.adicionar(new SymbolInfo(nome, tipo, SymbolInfo.Categoria.FUNCAO));
     }
 
     // -------------------------------------------------------------------------
