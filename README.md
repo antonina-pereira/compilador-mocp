@@ -12,7 +12,7 @@ Este passo vai criar a pasta build e a pasta src/generated e gerar os ficheiros 
 ### Passo 2
 Correr o programa sobre um ficheiro MOCP usando como exemplo o ficheiro de teste `caso_sucesso_0.mocp`:
 ```
-make run FILE=src/test/caso_sucesso.mocp
+make run FILE=src/test/caso_sucesso_0.mocp
 ```
 ### Limpar os ficheiros gerados
 ```
