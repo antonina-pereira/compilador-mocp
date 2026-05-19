@@ -38,13 +38,13 @@ public class Main {
     ASTBuilder builder = new ASTBuilder();
     ASTNode ast = builder.visit(tree);
 
-    // Verificar se foram encontrados erros
+    // Verificar se foram encontrados erros de sintaxe
     if(errorListener.temErros()) {
       System.err.println(errorListener.getNumErros() + " erro(s) encontrado(s). Árvore não gerada.");
       System.exit(1);
     }
 
-    // Imprimir a AST (apenas se não houver erros)
+    // Imprimir a AST
     System.out.println("AST:");
     ast.print("");
 
@@ -52,11 +52,19 @@ public class Main {
     SemanticAnalyzer analisadorSemantico = new SemanticAnalyzer();
     analisadorSemantico.analisar(ast);
 
+    // --- PROTEÇÃO SEMÂNTICA ---
+    // Se houve erros semânticos, abortamos a geração de código
+    if (analisadorSemantico.houveErros()) {
+      System.err.println("Erro: A análise semântica detetou problemas. Geração de TAC cancelada.");
+      System.exit(1);
+    }
+    // --------------------------
+
     // Executa o Gerador de Código TAC
     mocp.tac.TACGenerator geradorTac = new mocp.tac.TACGenerator();
     List<mocp.tac.Instruction> tacOriginal = geradorTac.gerar(ast);
 
-    // Executa o Otimizador de Código (NOVO!)
+    // Executa o Otimizador de Código
     mocp.optimizer.Optimizer otimizador = new mocp.optimizer.Optimizer();
     List<mocp.tac.Instruction> tacOtimizado = otimizador.otimizar(tacOriginal);
 

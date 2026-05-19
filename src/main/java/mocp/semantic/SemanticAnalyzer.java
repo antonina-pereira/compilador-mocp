@@ -175,4 +175,8 @@ public class SemanticAnalyzer {
         System.err.println("[Erro Semântico] " + mensagem);
         numErros++;
     }
+
+    public boolean houveErros() {
+        return numErros > 0;
+    }
 }
