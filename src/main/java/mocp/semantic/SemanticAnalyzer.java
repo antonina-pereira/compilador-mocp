@@ -115,7 +115,7 @@ public class SemanticAnalyzer {
         String nome = funcao.getNome();
         tipoFuncaoAtual = funcao.getTipo();
 
-        // Registar função no escopo Global
+        // 1. Registar função no escopo Global
         SymbolInfo infoFuncao = new SymbolInfo(nome, tipoFuncaoAtual, Categoria.FUNCAO);
         if (!tabelaSimbolos.inserir(infoFuncao)) {
             // Se já existir, pode ser o protótipo! Verificamos:
@@ -124,17 +124,41 @@ public class SemanticAnalyzer {
                 reportarErro("Já existe uma declaração com o nome '" + nome + "'!");
             } else if (existente != null && existente.getCategoria() == Categoria.PROTOTIPO) {
                 // Se era um protótipo, atualizamos a categoria para FUNCAO (já foi implementada)
-                tabelaSimbolos.inserir(infoFuncao); // O nosso scope atual não permite override direto, mas para simplificar vamos ignorar o erro de duplicado aqui pois validámos que era protótipo.
+                tabelaSimbolos.inserir(infoFuncao);
             }
         }
 
+        // 2. Entrar no escopo local da função
         tabelaSimbolos.enterScope();
+
+        // 3. Registar os parâmetros da função como variáveis locais no novo escopo!
         if (funcao.getParametros() != null) {
-            validarNo(funcao.getParametros());
+            ASTNode params = funcao.getParametros();
+            // No ASTBuilder, nós guardámos a lista de parâmetros dentro de um AfirmacaoCompostaNode
+            if (params instanceof AfirmacaoCompostaNode) {
+                for (ASTNode paramNo : ((AfirmacaoCompostaNode) params).getInstrucoes()) {
+                    if (paramNo instanceof ParametroNode) {
+                        ParametroNode pNode = (ParametroNode) paramNo;
+
+                        // Decide se é VETOR ou VARIAVEL simples
+                        Categoria cat = pNode.isEsVetor() ? Categoria.VETOR : Categoria.VARIAVEL;
+                        SymbolInfo infoParam = new SymbolInfo(pNode.getId(), pNode.getTipo(), cat);
+
+                        // Tenta registar o parâmetro na Tabela de Símbolos (no escopo local)
+                        if (!tabelaSimbolos.inserir(infoParam)) {
+                            reportarErro("O parâmetro '" + pNode.getId() + "' já foi declarado na assinatura desta função!");
+                        }
+                    }
+                }
+            }
         }
+
+        // 4. Validar o bloco de código (instruções)
         if (funcao.getBloco() != null) {
             validarNo(funcao.getBloco());
         }
+
+        // 5. Sair do escopo local (destrói as variáveis locais)
         tabelaSimbolos.exitScope();
         tipoFuncaoAtual = "";
     }

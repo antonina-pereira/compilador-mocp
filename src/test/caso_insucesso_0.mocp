@@ -1,8 +1,7 @@
-/* Exemplo com dois erros:
-   1. Erro léxico: o caráter '@' não pertence ao alfabeto da linguagem MOCP.
-      O lexer não reconhece '@' como token válido — é capturado pela regra ANY.
-   2. Erro sintático: a chaveta '}' de fecho do bloco 'senao' está em falta. */
-se (x > y) {
-y = x;
-} senao {
-x = @y; /* erro léxico: '@' é um caráter inválido em MOCP */
+inteiro global = 10;
+inteiro calcular(inteiro); /* Correção: Apenas o tipo no protótipo! */
+
+vazio outra_funcao() {
+    global = 5;
+}
+/* Continua a faltar a função vazio principal() de propósito! */

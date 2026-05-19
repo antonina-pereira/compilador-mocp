@@ -11,6 +11,12 @@ public class ParametroNode extends ASTNode {
         this.esVetor = esVetor;
     }
 
+    // --- GETTERS ADICIONADOS PARA O SEMÂNTICO ---
+    public String getTipo() { return tipo; }
+    public String getId() { return id; }
+    public boolean isEsVetor() { return esVetor; }
+    // --------------------------------------------
+
     @Override
     public void print(String indent) {
         System.out.println(indent + "Parametro -> " + tipo + (esVetor ? "[] " : " ") + id);

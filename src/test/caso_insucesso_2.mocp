@@ -1,4 +1,9 @@
-/* Exemplo de ciclo para: */
-par (i = 0; i < 10; i = i + 1) {
-x = x + i;
+inteiro gerar_numero() {
+    inteiro valor = 42;
+    retornar; /* ERRO 1: A função promete 'inteiro', mas o 'retornar' não tem expressão! */
+}
+
+vazio principal() {
+    inteiro taxa = 10;
+    real taxa = 20.5; /* ERRO 2: O nome 'taxa' já foi usado neste bloco! */
 }
