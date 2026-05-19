@@ -3,6 +3,13 @@ package mocp;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 import mocp.ast.ASTNode;
+import mocp.ast.ProgramaNode;
+import mocp.semantic.SemanticAnalyzer;
+import mocp.tac.Instruction;
+import mocp.tac.TACGenerator;
+import mocp.optimizer.Optimizer;
+
+import java.util.List;
 
 public class Main {
 
@@ -32,19 +39,47 @@ public class Main {
     // Gerar a parse tree
     ParseTree tree = parser.programa();
 
-    // Construir a AST
-    ASTBuilder builder = new ASTBuilder();
-    ASTNode ast = builder.visit(tree);
-
-    // Verificar se foram encontrados erros
+    // Verificar erros léxicos/sintáticos
     if(errorListener.temErros()) {
-      System.err.println(errorListener.getNumErros() + " erro(s) encontrado(s). Árvore não gerada.");
+      System.err.println(errorListener.getNumErros() + " erro(s) encontrado(s). Compilação interrompida.");
       System.exit(1);
     }
 
-    // Imprimir a AST (apenas se não houver erros)
-    System.out.println("AST:");
+    // Construir a AST
+    ASTBuilder builder = new ASTBuilder();
+    ProgramaNode ast = (ProgramaNode) builder.visit(tree);
+
+    // Imprimir a AST
+    System.out.println("=== AST ===");
     ast.print("");
 
+    // Análise semântica
+    SemanticAnalyzer semantico = new SemanticAnalyzer();
+    semantico.analisar(ast);
+    if(semantico.temErros()) {
+      System.err.println("\n=== Erros Semânticos ===");
+      for(String erro : semantico.getErros()) {
+        System.err.println(erro);
+      }
+      System.exit(1);
+    }
+
+    // Geração de código TAC
+    TACGenerator gerador = new TACGenerator();
+    List<Instruction> tac = gerador.gerar(ast);
+
+    System.out.println("\n=== TAC (antes de otimizar) ===");
+    for(Instruction instr : tac) {
+      System.out.println("  " + instr);
+    }
+
+    // Otimização
+    Optimizer otimizador = new Optimizer();
+    List<Instruction> tacOtimizado = otimizador.otimizar(tac);
+
+    System.out.println("\n=== TAC (otimizado) ===");
+    for(Instruction instr : tacOtimizado) {
+      System.out.println("  " + instr);
+    }
   }
 }
