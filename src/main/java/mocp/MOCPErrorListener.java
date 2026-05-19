@@ -3,6 +3,7 @@ package mocp;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.Token;
 
 // Error listener personalizado para reportar erros léxicos e sintáticos
 public class MOCPErrorListener extends BaseErrorListener {
@@ -19,7 +20,7 @@ public class MOCPErrorListener extends BaseErrorListener {
 
     // Se for erro léxico (token inválido)
     if (offendingSymbol instanceof Token token &&
-      token.getType() == MOCLexer.ERROR) {
+      token.getType() == MOCPLexer.ERRO_CHAR) {
       System.err.println("Erro léxico: caractere inválido '" +
         token.getText() + "' na linha " + line +
           ", coluna " + charPositionInLine);

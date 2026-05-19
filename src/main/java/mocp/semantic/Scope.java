@@ -7,49 +7,49 @@ import java.util.Stack;
 
 public class Scope {
 
-    private Stack<SymbolTable> stack;
+    private Stack<SymbolTable> pilha;
 
     public Scope() {
-        stack = new Stack<>();
+        pilha = new Stack<>();
         // Escopo global
-        stack.push(new SymbolTable());
+        pilha.push(new SymbolTable());
     }
 
     // Entrar num novo escopo (ex: função, bloco)
-    public void enterScope() {
-        stack.push(new SymbolTable());
+    public void entrarEscopo() {
+        pilha.push(new SymbolTable());
     }
 
     // Sair do escopo atual
-    public void exitScope() {
-        if (stack.size() > 1) {
-            stack.pop();
+    public void sairEscopo() {
+        if (pilha.size() > 1) {
+            pilha.pop();
         }
     }
 
     // Inserir símbolo no escopo atual
-    public boolean add(SymbolInfo symbol) {
-        return stack.peek().insert(symbol);
+    public boolean adicionar(SymbolInfo simbolo) {
+        return pilha.peek().inserir(simbolo);
     }
 
     // Procurar símbolo em todos os escopos (de cima para baixo)
-    public SymbolInfo search(String name) {
-        for (int i = stack.size() - 1; i >= 0; i--) {
-            SymbolTable tabel = stack.get(i);
-            if (tabel.exists(name)) {
-                return tabel.get(name);
+    public SymbolInfo procurar(String nome) {
+        for (int i = pilha.size() - 1; i >= 0; i--) {
+            SymbolTable tabela = pilha.get(i);
+            if (tabela.existe(nome)) {
+                return tabela.obter(nome);
             }
         }
         return null;
     }
 
     // Verificar se existe no escopo atual
-    public boolean existsInCurrentScope(String name) {
-        return stack.peek().exists(name);
+    public boolean existeNoEscopoAtual(String nome) {
+        return pilha.peek().existe(nome);
     }
 
     @Override
     public String toString() {
-        return stack.toString();
+        return pilha.toString();
     }
 }

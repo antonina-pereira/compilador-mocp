@@ -1,227 +1,172 @@
-public class ASTBuilder extends MOCBaseVisitor<ASTNode> {
+package mocp;
+
+import mocp.ast.ASTNode;
+
+public class ASTBuilder extends MOCPBaseVisitor<ASTNode> {
+
     // Nível superior
     @Override
-    public ASTNode visitPrograma(MOCParser.ProgramaContext ctx) {
-        ProgramaNode prog = new ProgramaNode();
-
-        for (var elem : ctx.children) {
-            ASTNode n = elem.accept(this);
-            if (n != null) prog.elementos.add(n);
-        }
-
-        return prog;
+    public ASTNode visitPrograma(MOCPParser.ProgramaContext ctx) {
+        // TODO
+        return null;
     }
 
     @Override
-    public ASTNode visitDeclaracao(MOCParser.DeclaracaoContext ctx) {
-        DeclaracaoNode d = new DeclaracaoNode();
-        d.tipo = ctx.especificadorTipo().getText();
-        d.nome = ctx.declarador().ID().getText();
-        return d;
+    public ASTNode visitDeclaracao(MOCPParser.DeclaracaoContext ctx) {
+        // TODO
+        return null;
     }
 
-    // TODO
     @Override
-    public ASTNode visitDeclarador(MOCParser.DeclaracaoContext ctx) {
-        DeclaracaoNode d = new DeclaracaoNode();
-        d.tipo = ctx.especificadorTipo().getText();
-        d.nome = ctx.declarador().ID().getText();
-        return d;
-    } 
-
-    @Override
-    public ASTNode visitInicializador(MOCParser.DeclaracaoContext ctx) {
-        DeclaracaoNode d = new DeclaracaoNode();
-        d.tipo = ctx.especificadorTipo().getText();
-        d.nome = ctx.declarador().ID().getText();
-        return d;
+    public ASTNode visitDeclarador(MOCPParser.DeclaradorContext ctx) {
+        // TODO
+        return null;
     }
 
-
     @Override
-    public ASTNode visitDefinicaoPrototipo(MOCParser.DeclaracaoContext ctx) {
-        DeclaracaoNode d = new DeclaracaoNode();
-        d.tipo = ctx.especificadorTipo().getText();
-        d.nome = ctx.declarador().ID().getText();
-        return d;
+    public ASTNode visitInicializador(MOCPParser.InicializadorContext ctx) {
+        // TODO
+        return null;
     }
 
-    @Overriderototipo
-    public ASTNode visitDefinicaoFuncao(MOCParser.DeclaracaoContext ctx) {
-        DeclaracaoNode d = new DeclaracaoNode();
-        d.tipo = ctx.especificadorTipo().getText();
-        d.nome = ctx.declarador().ID().getText();
-        return d;
+    @Override
+    public ASTNode visitDefinicaoPrototipo(MOCPParser.DefinicaoPrototipoContext ctx) {
+        // TODO
+        return null;
+    }
+
+    @Override
+    public ASTNode visitDefinicaoFuncao(MOCPParser.DefinicaoFuncaoContext ctx) {
+        // TODO
+        return null;
     }
 
     // Parâmetros e argumentos
-    @Overriderototipo
-    public ASTNode visitChamadaFuncao(MOCParser.DeclaracaoContext ctx) {
-        DeclaracaoNode d = new DeclaracaoNode();
-        d.tipo = ctx.especificadorTipo().getText();
-        d.nome = ctx.declarador().ID().getText();
-        return d;
+    @Override
+    public ASTNode visitChamadaFuncao(MOCPParser.ChamadaFuncaoContext ctx) {
+        // TODO
+        return null;
     }
 
-    @Overriderototipo
-    public ASTNode visitListaParametro(MOCParser.DeclaracaoContext ctx) {
-        DeclaracaoNode d = new DeclaracaoNode();
-        d.tipo = ctx.especificadorTipo().getText();
-        d.nome = ctx.declarador().ID().getText();
-        return d;
+    @Override
+    public ASTNode visitListaParametro(MOCPParser.ListaParametroContext ctx) {
+        // TODO
+        return null;
     }
 
-    @Overriderototipo
-    public ASTNode visitParametro(MOCParser.DeclaracaoContext ctx) {
-        DeclaracaoNode d = new DeclaracaoNode();
-        d.tipo = ctx.especificadorTipo().getText();
-        d.nome = ctx.declarador().ID().getText();
-        return d;
+    @Override
+    public ASTNode visitParametro(MOCPParser.ParametroContext ctx) {
+        // TODO
+        return null;
     }
 
-    @Overriderototipo
-    public ASTNode visitListaArgumento(MOCParser.DeclaracaoContext ctx) {
-        DeclaracaoNode d = new DeclaracaoNode();
-        d.tipo = ctx.especificadorTipo().getText();
-        d.nome = ctx.declarador().ID().getText();
-        return d;
+    @Override
+    public ASTNode visitListaArgumento(MOCPParser.ListaArgumentoContext ctx) {
+        // TODO
+        return null;
     }
 
     // Afirmações
-    @Overriderototipo
-    public ASTNode visitAfirmacaoExpressao(MOCParser.DeclaracaoContext ctx) {
-        DeclaracaoNode d = new DeclaracaoNode();
-        d.tipo = ctx.especificadorTipo().getText();
-        d.nome = ctx.declarador().ID().getText();
-        return d;
+    @Override
+    public ASTNode visitAfirmacaoExpressao(MOCPParser.AfirmacaoExpressaoContext ctx) {
+        // TODO
+        return null;
     }
 
-    @Overriderototipo
-    public ASTNode visitAfirmacaoComposta(MOCParser.DeclaracaoContext ctx) {
-        DeclaracaoNode d = new DeclaracaoNode();
-        d.tipo = ctx.especificadorTipo().getText();
-        d.nome = ctx.declarador().ID().getText();
-        return d;
+    @Override
+    public ASTNode visitAfirmacaoComposta(MOCPParser.AfirmacaoCompostaContext ctx) {
+        // TODO
+        return null;
     }
 
-    @Overriderototipo
-    public ASTNode visitAfirmacaoSe(MOCParser.DeclaracaoContext ctx) {
-        DeclaracaoNode d = new DeclaracaoNode();
-        d.tipo = ctx.especificadorTipo().getText();
-        d.nome = ctx.declarador().ID().getText();
-        return d;
+    @Override
+    public ASTNode visitAfirmacaoSe(MOCPParser.AfirmacaoSeContext ctx) {
+        // TODO
+        return null;
     }
 
-    @Overriderototipo
-    public ASTNode visitAfirmacaoEnquanto(MOCParser.DeclaracaoContext ctx) {
-        DeclaracaoNode d = new DeclaracaoNode();
-        d.tipo = ctx.especificadorTipo().getText();
-        d.nome = ctx.declarador().ID().getText();
-        return d;
+    @Override
+    public ASTNode visitAfirmacaoEnquanto(MOCPParser.AfirmacaoEnquantoContext ctx) {
+        // TODO
+        return null;
     }
 
-    @Overriderototipo
-    public ASTNode visitAfirmacaoPara(MOCParser.DeclaracaoContext ctx) {
-        DeclaracaoNode d = new DeclaracaoNode();
-        d.tipo = ctx.especificadorTipo().getText();
-        d.nome = ctx.declarador().ID().getText();
-        return d;
+    @Override
+    public ASTNode visitAfirmacaoPara(MOCPParser.AfirmacaoParaContext ctx) {
+        // TODO
+        return null;
     }
 
-    @Overriderototipo
-    public ASTNode visitAfirmacaoRetornar(MOCParser.DeclaracaoContext ctx) {
-        DeclaracaoNode d = new DeclaracaoNode();
-        d.tipo = ctx.especificadorTipo().getText();
-        d.nome = ctx.declarador().ID().getText();
-        return d;
+    @Override
+    public ASTNode visitAfirmacaoRetornar(MOCPParser.AfirmacaoRetornarContext ctx) {
+        // TODO
+        return null;
     }
 
     // Expressões
-    @Overriderototipo
-    public ASTNode visitExpressao(MOCParser.DeclaracaoContext ctx) {
-        DeclaracaoNode d = new DeclaracaoNode();
-        d.tipo = ctx.especificadorTipo().getText();
-        d.nome = ctx.declarador().ID().getText();
-        return d;
+    @Override
+    public ASTNode visitExpressao(MOCPParser.ExpressaoContext ctx) {
+        // TODO
+        return null;
     }
 
-    @Overriderototipo
-    public ASTNode visitExpressaoAtribuir(MOCParser.DeclaracaoContext ctx) {
-        DeclaracaoNode d = new DeclaracaoNode();
-        d.tipo = ctx.especificadorTipo().getText();
-        d.nome = ctx.declarador().ID().getText();
-        return d;
+    @Override
+    public ASTNode visitExpressaoAtribuir(MOCPParser.ExpressaoAtribuirContext ctx) {
+        // TODO
+        return null;
     }
 
-    @Overriderototipo
-    public ASTNode visitExpressaoOULogica(MOCParser.DeclaracaoContext ctx) {
-        DeclaracaoNode d = new DeclaracaoNode();
-        d.tipo = ctx.especificadorTipo().getText();
-        d.nome = ctx.declarador().ID().getText();
-        return d;
+    @Override
+    public ASTNode visitExpressaoOULogica(MOCPParser.ExpressaoOULogicaContext ctx) {
+        // TODO
+        return null;
     }
 
-    @Overriderototipo
-    public ASTNode visitExpressaoELogica(MOCParser.DeclaracaoContext ctx) {
-        DeclaracaoNode d = new DeclaracaoNode();
-        d.tipo = ctx.especificadorTipo().getText();
-        d.nome = ctx.declarador().ID().getText();
-        return d;
+    @Override
+    public ASTNode visitExpressaoELogica(MOCPParser.ExpressaoELogicaContext ctx) {
+        // TODO
+        return null;
     }
 
-    @Overriderototipo
-    public ASTNode visitExpressaoIgualdade(MOCParser.DeclaracaoContext ctx) {
-        DeclaracaoNode d = new DeclaracaoNode();
-        d.tipo = ctx.especificadorTipo().getText();
-        d.nome = ctx.declarador().ID().getText();
-        return d;
+    @Override
+    public ASTNode visitExpressaoIgualdade(MOCPParser.ExpressaoIgualdadeContext ctx) {
+        // TODO
+        return null;
     }
 
-    @Overriderototipo
-    public ASTNode visitExpressaoRelacional(MOCParser.DeclaracaoContext ctx) {
-        DeclaracaoNode d = new DeclaracaoNode();
-        d.tipo = ctx.especificadorTipo().getText();
-        d.nome = ctx.declarador().ID().getText();
-        return d;
+    @Override
+    public ASTNode visitExpressaoRelacional(MOCPParser.ExpressaoRelacionalContext ctx) {
+        // TODO
+        return null;
     }
 
-    @Overriderototipo
-    public ASTNode visitExpressaoAditiva(MOCParser.DeclaracaoContext ctx) {
-        DeclaracaoNode d = new DeclaracaoNode();
-        d.tipo = ctx.especificadorTipo().getText();
-        d.nome = ctx.declarador().ID().getText();
-        return d;
+    @Override
+    public ASTNode visitExpressaoAditiva(MOCPParser.ExpressaoAditivaContext ctx) {
+        // TODO
+        return null;
     }
 
-    @Overriderototipo
-    public ASTNode visitExpressaoMultiplicativa(MOCParser.DeclaracaoContext ctx) {
-        DeclaracaoNode d = new DeclaracaoNode();
-        d.tipo = ctx.especificadorTipo().getText();
-        d.nome = ctx.declarador().ID().getText();
-        return d;
+    @Override
+    public ASTNode visitExpressaoMultiplicativa(MOCPParser.ExpressaoMultiplicativaContext ctx) {
+        // TODO
+        return null;
     }
 
-    @Overriderototipo
-    public ASTNode visitExpressaoUnaria(MOCParser.DeclaracaoContext ctx) {
-        DeclaracaoNode d = new DeclaracaoNode();
-        d.tipo = ctx.especificadorTipo().getText();
-        d.nome = ctx.declarador().ID().getText();
-        return d;
+    @Override
+    public ASTNode visitExpressaoUnaria(MOCPParser.ExpressaoUnariaContext ctx) {
+        // TODO
+        return null;
     }
 
-    @Overriderototipo
-    public ASTNode visitExpressaoVetor(MOCParser.DeclaracaoContext ctx) {
-        DeclaracaoNode d = new DeclaracaoNode();
-        d.tipo = ctx.especificadorTipo().getText();
-        d.nome = ctx.declarador().ID().getText();
-        return d;
+    @Override
+    public ASTNode visitExpressaoVetor(MOCPParser.ExpressaoVetorContext ctx) {
+        // TODO
+        return null;
     }
 
-    @Overriderototipo
-    public ASTNode visitExpressaoSimples(MOCParser.DeclaracaoContext ctx) {
-        DeclaracaoNode d = new DeclaracaoNode();
-        d.tipo = ctx.especificadorTipo().getText();
-        d.nome = ctx.declarador().ID().getText();
-        return d;
+    @Override
+    public ASTNode visitExpressaoSimples(MOCPParser.ExpressaoSimplesContext ctx) {
+        // TODO
+        return null;
     }
 }

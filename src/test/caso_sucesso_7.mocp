@@ -1,0 +1,17 @@
+/* Teste de inicialização de vetor com lista {1,2,3} e vetor sem dimensão */
+inteiro soma(inteiro[], inteiro);
+
+inteiro soma(inteiro v[], inteiro n) {
+    inteiro i;
+    inteiro total = 0;
+    para (i = 0; i < n; i = i + 1) {
+        total = total + v[i];
+    }
+    retornar total;
+}
+
+vazio principal(vazio) {
+    inteiro v[] = {1, 2, 3, 4, 5};
+    inteiro s[] = lers();
+    escrever(soma(v, 5));
+}

@@ -37,7 +37,7 @@ declarador
 
 inicializador
   : expressao
-  | ECOLCHETE (expressao (VIRGULA expressao)*)? DCOLCHETE
+  | ECHAVE (expressao (VIRGULA expressao)*)? DCHAVE
   ;
 
 // Definição de protótipos
@@ -231,7 +231,4 @@ ID : [a-zA-Z_] [a-zA-Z0-9_]* ; // Identificadores
 
 ERRO_CHAR
   : .
-  {
-    setType(ERROR);
-  }
   ;

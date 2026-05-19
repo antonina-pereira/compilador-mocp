@@ -1,0 +1,5 @@
+/* Erro sintático: afirmação solta no topo do programa (fora de qualquer função).
+   Com a melhoria 6, 'programa' apenas aceita declaracoes, definicoesFuncao e
+   prototiposFuncao — afirmacoes soltas devem ser rejeitadas. */
+x = 10;
+escrever(x);

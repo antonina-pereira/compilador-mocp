@@ -2,6 +2,7 @@ package mocp;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
+import mocp.ast.ASTNode;
 
 public class Main {
 

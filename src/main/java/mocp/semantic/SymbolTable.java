@@ -5,33 +5,33 @@ import java.util.Map;
 
 public class SymbolTable {
 
-    private Map<String, SymbolInfo> symbols = new HashMap<>();
+    private Map<String, SymbolInfo> simbolos = new HashMap<>();
 
     // Inserir símbolo no escopo atual
-    public boolean insert(SymbolInfo symbol) {
-        String name = symbol.getName();
+    public boolean inserir(SymbolInfo simbolo) {
+        String nome = simbolo.getNome();
 
         // Se já existe, erro semântico e devolve falso
-        if (symbols.containsKey(name)) {
+        if (simbolos.containsKey(nome)) {
             return false;
         }
 
-        symbols.put(name, symbol);
+        simbolos.put(nome, simbolo);
         return true;
     }
 
     // Verificar se existe no escopo atual
-    public boolean exists(String name) {
-        return symbols.containsKey(name);
+    public boolean existe(String nome) {
+        return simbolos.containsKey(nome);
     }
 
     // Obter símbolo ou null se não existir
-    public SymbolInfo get(String name) {
-        return symbols.get(name);
+    public SymbolInfo obter(String nome) {
+        return simbolos.get(nome);
     }
 
     @Override
     public String toString() {
-        return symbols.toString();
+        return simbolos.toString();
     }
 }

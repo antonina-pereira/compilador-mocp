@@ -21,7 +21,7 @@ all: antlr compile
 
 antlr:
 	mkdir -p $(GEN_DIR)
-	java -jar $(ANTLR_JAR) -Dlanguage=Java -package $(PACKAGE) -o $(GEN_DIR) $(GRAMMAR)
+	java -jar $(ANTLR_JAR) -Dlanguage=Java -visitor -package $(PACKAGE) -o $(GEN_DIR) $(GRAMMAR)
 
 compile:
 	mkdir -p $(BUILD_DIR)
