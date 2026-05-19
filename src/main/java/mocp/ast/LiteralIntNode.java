@@ -11,6 +11,8 @@ public class LiteralIntNode extends ASTNode {
         return valor;
     }
 
+
+
     @Override
     public void print(String indent) {
         System.out.println(indent + "Literal Inteiro: " + valor);

@@ -50,5 +50,9 @@ public class Main {
     SemanticAnalyzer analisadorSemantico = new SemanticAnalyzer();
     analisadorSemantico.analisar(ast);
 
+    // Depois da analise semântica terminar, gerar o Three Address Code:
+    mocp.tac.TACGenerator geradorTac = new mocp.tac.TACGenerator();
+    geradorTac.gerar(ast);
+
   }
 }
