@@ -46,11 +46,15 @@ public class TACGenerator {
             gerarSe((SeNode) no);
         } else if (no instanceof RetornarNode) {
             gerarRetornar((RetornarNode) no);
+        } else if (no instanceof ParaNode) { // ADICIONAR ESTA LINHA!
+            gerarPara((ParaNode) no);
         } else if (no instanceof OpBinNode) {
-            gerarExpressao(no); // Atribuições soltas: x = 5;
+            gerarExpressao(no);
         }
         // Nota: EnquantoNode e ParaNode podem ser adicionados aqui usando os respetivos getters!
     }
+
+
 
     private void gerarDeclaracao(DeclaracaoNode decl) {
         for (ASTNode item : decl.getItens()) {
@@ -80,6 +84,41 @@ public class TACGenerator {
         } else {
             emit(new RotuloInstr(rotSenao));
         }
+    }
+
+    private void gerarPara(ParaNode no) {
+        // 1. Usa os métodos públicos getInit(), getCondicao(), getCorpo(), getIncremento()
+        if (no.getInit() != null) {
+            gerarExpressao(no.getInit());
+        }
+
+        String rotInicio = labels.newLabel();
+        String rotFim = labels.newLabel();
+
+        // 2. Coloca o rótulo de início do ciclo
+        emit(new RotuloInstr(rotInicio));
+
+        // 3. Avalia a condição usando o getter
+        if (no.getCondicao() != null) {
+            String cond = gerarExpressao(no.getCondicao());
+            emit(new SeFalsoInstr(cond, rotFim));
+        }
+
+        // 4. Executa o corpo usando o getter
+        if (no.getCorpo() != null) {
+            gerarElemento(no.getCorpo());
+        }
+
+        // 5. Executa o incremento usando o getter
+        if (no.getIncremento() != null) {
+            gerarExpressao(no.getIncremento());
+        }
+
+        // 6. Salta de volta para o início
+        emit(new VaiParaInstr(rotInicio));
+
+        // 7. Coloca o rótulo de fim do ciclo
+        emit(new RotuloInstr(rotFim));
     }
 
     private void gerarRetornar(RetornarNode no) {

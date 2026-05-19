@@ -13,6 +13,24 @@ public class ParaNode extends ASTNode {
         this.bloco = bloco;
     }
 
+    // --- MÉTODOS PÚBLICOS PARA O GERADOR TAC ---
+
+    public ASTNode getInit() {
+        return this.inicializacao;
+    }
+
+    public ASTNode getCondicao() {
+        return this.condicao;
+    }
+
+    public ASTNode getIncremento() {
+        return this.incremento;
+    }
+
+    public ASTNode getCorpo() {
+        return this.bloco;
+    }
+
     @Override
     public void print(String indent) {
         System.out.println(indent + "Loop PARA");
