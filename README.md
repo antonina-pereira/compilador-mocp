@@ -57,5 +57,5 @@ Apenas existem os tipos inteiro e real.
 As variáveis podem ser simples ou vetores.
 Inteiros podem representar caracteres (ASCII).
 Vetores de inteiros podem representar strings (terminadas em 0).
-Os comentários são o habitual do C.
+Os comentários são o habitual do C (//comment our /*comment*/.
 Os operadores são mesmo da linguagem C.
