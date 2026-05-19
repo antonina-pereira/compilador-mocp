@@ -2,6 +2,8 @@ package mocp;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
+import mocp.ast.ASTNode;
+import mocp.semantic.SemanticAnalyzer;
 
 public class Main {
 
@@ -44,6 +46,9 @@ public class Main {
     // Imprimir a AST (apenas se não houver erros)
     System.out.println("AST:");
     ast.print("");
+
+    SemanticAnalyzer analisadorSemantico = new SemanticAnalyzer();
+    analisadorSemantico.analisar(ast);
 
   }
 }

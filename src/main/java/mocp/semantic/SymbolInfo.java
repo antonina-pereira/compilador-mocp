@@ -1,58 +1,40 @@
 package mocp.semantic;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 public class SymbolInfo {
+    private String nome;
+    private String tipo;        // "inteiro", "real", ou "vazio"
+    private Categoria categoria;
 
-    public enum Category {
-        VARIAVEL,
-        FUNCAO,
-        PARAMETRO,
-        VETOR
+    // Se for FUNCAO ou PROTOTIPO, guardamos a lista dos tipos dos parâmetros
+    // Ex: para a função fact(inteiro k), esta lista terá ["inteiro"]
+    private List<String> tiposParametros;
+
+    public SymbolInfo(String nome, String tipo, Categoria categoria) {
+        this.nome = nome;
+        this.tipo = tipo;
+        this.categoria = categoria;
+        this.tiposParametros = new ArrayList<>();
     }
 
-    private String name;  // Identificador como x, y, arr
-    private String type;  // Tipo semântico como inteiro, real, vazio
-    private Categoria category; // Para distinguir variável de função, etc.
+    public String getNome() { return nome; }
+    public String getTipo() { return tipo; }
+    public Categoria getCategoria() { return categoria; }
 
-    // Para vetores
-    private List<Integer> dimensions = new ArrayList<>();
+    public List<String> getTiposParametros() { return tiposParametros; }
 
-    // Para funções
-    private List<String> parametersTypes = new ArrayList<>();
-
-    public SymbolInfo(String name, String type, Categoria category) {
-        this.name = nome;
-        this.type = type;
-        this.category = category;
+    public void addTipoParametro(String tipoParam) {
+        this.tiposParametros.add(tipoParam);
     }
 
-    // Getters
-    public String getName() { return name; }
-    public String getType() { return type; }
-    public Categoria getCategory() { return category; }
-    public List<Integer> getDimensions() { return dimensions; }
-    public List<String> getParametersTypes() { return parametersTypes; }
-
-    // Para vetores
-    public void addDimension(int size) {
-        dimensions.add(size);
-    }
-
-    // Para funções
-    public void addParameters(String type) {
-        parametersTypes.add(type);
-    }
-
+    // Método utilitário para facilitar a impressão da tabela (Debug)
     @Override
     public String toString() {
-        return "SymbolInfo{" +
-                "nome='" + name + '\'' +
-                ", tipo='" + type + '\'' +
-                ", categoria=" + category +
-                ", dimensoes=" + dimensions +
-                ", tiposParametros=" + parametersTypes +
-                '}';
+        if (categoria == Categoria.FUNCAO || categoria == Categoria.PROTOTIPO) {
+            return categoria + " " + nome + "(" + String.join(", ", tiposParametros) + ") -> " + tipo;
+        }
+        return categoria + " " + tipo + " " + nome;
     }
 }

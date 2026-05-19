@@ -5,8 +5,12 @@ grammar MOCP;
 // PARSER (analise sintatica)
 // ==========================
 
-// Correção Estrutural: Protótipos antes de funções e variáveis globais
-programa : (prototipo PONTO_VIRG)* (dec_variavel PONTO_VIRG | funcao)* EOF ;
+// Correção: Protótipos antes de funções e variáveis globais
+// Correção: Agora o parser aceita 3 elementos globais em qualquer ordem
+// 			 A regra de que prototipos vêm primeiro é aplicada no Analisador Semântico, (antes o código tinha conflito de Lookahead (LL)*)
+// 			 Como prototipo, dec_variavel e funcao comecam da mesma maneirda (tipo ID...) o ANTLR fica baralhado na transicao do primeiro bloco * para o segundo bloco *
+// 			 Não sabia quando é que os protótipos acabam e as funções começam.
+programa : (prototipo PONTO_VIRG | dec_variavel PONTO_VIRG | funcao)* EOF ;
 
 // Define os tipos de dados básicos
 tipo : T_INTEIRO | T_REAL | T_VAZIO ;
@@ -138,7 +142,7 @@ FLOAT_VAL : [0-9]+ '.' [0-9]+ ;
 // Literais de String e Char com suporte a escapes
 fragment ESCAPE : '\\' [btnfr"'\\] ;
 STRING_VAL : '"' ( ESCAPE | ~['"\\\r\n] )* '"' ;
-CHAR_VAL   : '\'' ( ESCAPE | ~['\'\\\r\n] ) '\'' ;
+CHAR_VAL   : '\'' ( ESCAPE | ~['\\\r\n] ) '\'' ;
 
 WS : [ \t\r\n]+ -> skip ;
 COMMENT : '/*' .*? '*/' -> skip ;

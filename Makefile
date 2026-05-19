@@ -17,21 +17,33 @@ BUILD_DIR = build
 PACKAGE = mocp
 MAIN_CLASS = mocp.Main
 
+# ==============================================================================
+# DETEÇÃO ROBUSTA DE SISTEMA OPERATIVO
+# ==============================================================================
+# Se a variável OS contiver "Windows" ou se a COMSPEC estiver definida, assume Windows
+ifneq ($(findstring Windows,$(OS)),)
+    CP_SEP := ;
+else ifdef ComSpec
+    CP_SEP := ;
+else
+    CP_SEP := :
+endif
+# ==============================================================================
+
 all: antlr compile
 
 antlr:
-	mkdir -p $(GEN_DIR) 
-	#não da para ativar o visitor dentro do ficheiro .g4 entao meti o argumento no comando no ficheiro Makefile.
-	java -jar $(ANTLR_JAR) -Dlanguage=Java -visitor -package $(PACKAGE) -o $(GEN_DIR) $(GRAMMAR)
+	mkdir -p $(GEN_DIR)/$(PACKAGE)
+	java -jar $(ANTLR_JAR) -Dlanguage=Java -visitor -package $(PACKAGE) -o $(GEN_DIR)/$(PACKAGE) $(GRAMMAR)
 
 compile:
 	mkdir -p $(BUILD_DIR)
 	javac -cp $(ANTLR_JAR) -d $(BUILD_DIR) \
-        $(shell find $(SRC_DIR) -name "*.java") \
-        $(shell find $(GEN_DIR) -name "*.java")
+       $(shell find $(SRC_DIR) -name "*.java") \
+       $(shell find $(GEN_DIR) -name "*.java")
 
 run:
-	java -cp $(BUILD_DIR):$(ANTLR_JAR) $(MAIN_CLASS) $(FILE)
+	java -cp "$(BUILD_DIR)$(CP_SEP)$(ANTLR_JAR)" $(MAIN_CLASS) $(FILE)
 
 clean:
 	rm -rf $(BUILD_DIR) $(GEN_DIR)

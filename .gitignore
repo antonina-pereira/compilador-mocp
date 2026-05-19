@@ -105,3 +105,4 @@ src/generated/
 
 .env
 .env.*
+antlr-*.jar

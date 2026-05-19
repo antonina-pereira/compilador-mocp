@@ -1,37 +1,56 @@
 package mocp.semantic;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Stack;
 
 public class SymbolTable {
+    private Stack<Scope> pilhaEscopos;
 
-    private Map<String, SymbolInfo> symbols = new HashMap<>();
+    public SymbolTable() {
+        this.pilhaEscopos = new Stack<>();
+        // Assim que a tabela é criada, abrimos automaticamente o Escopo Global
+        enterScope();
+    }
 
-    // Inserir símbolo no escopo atual
-    public boolean insert(SymbolInfo symbol) {
-        String name = symbol.getName();
+    // Abre um novo escopo (ex: ao entrar numa função ou bloco)
+    public void enterScope() {
+        pilhaEscopos.push(new Scope());
+    }
 
-        // Se já existe, erro semântico e devolve falso
-        if (symbols.containsKey(name)) {
-            return false;
+    // Fecha o escopo atual (ex: ao sair de uma função, as variáveis locais morrem)
+    public void exitScope() {
+        if (!pilhaEscopos.isEmpty()) {
+            pilhaEscopos.pop();
         }
+    }
 
-        symbols.put(name, symbol);
+    // Tenta inserir um símbolo. Retorna 'false' se já existir uma variável com o mesmo nome neste escopo
+    public boolean inserir(SymbolInfo simbolo) {
+        Scope escopoAtual = pilhaEscopos.peek();
+        if (escopoAtual.existeLocal(simbolo.getNome())) {
+            return false; // Erro: Variável duplicada no mesmo escopo
+        }
+        escopoAtual.inserir(simbolo);
         return true;
     }
 
-    // Verificar se existe no escopo atual
-    public boolean exists(String name) {
-        return symbols.containsKey(name);
+    // Procura um símbolo de cima para baixo (do escopo mais local até ao global)
+    public SymbolInfo procurar(String nome) {
+        for (int i = pilhaEscopos.size() - 1; i >= 0; i--) {
+            SymbolInfo sim = pilhaEscopos.get(i).procurarLocal(nome);
+            if (sim != null) {
+                return sim; // Encontrou!
+            }
+        }
+        return null; // Não encontrou em lado nenhum (Variável não declarada!)
     }
 
-    // Obter símbolo ou null se não existir
-    public SymbolInfo get(String name) {
-        return symbols.get(name);
-    }
-
-    @Override
-    public String toString() {
-        return symbols.toString();
+    // Imprime a tabela toda para ajudar no Debug
+    public void printTable() {
+        System.out.println("\n--- TABELA DE SIMBOLOS ---");
+        for (int i = 0; i < pilhaEscopos.size(); i++) {
+            System.out.println("Escopo Nivel " + i + (i == 0 ? " (Global):" : " (Local):"));
+            pilhaEscopos.get(i).printScope("  ");
+        }
+        System.out.println("--------------------------\n");
     }
 }

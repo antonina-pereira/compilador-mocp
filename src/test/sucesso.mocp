@@ -1,0 +1,7 @@
+inteiro global = 10;
+inteiro calcular(inteiro); /* Correção: Apenas o tipo no protótipo! */
+
+vazio outra_funcao() {
+    global = 5;
+}
+/* Continua a faltar a função vazio principal() de propósito! */

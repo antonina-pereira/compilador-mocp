@@ -3,6 +3,7 @@ package mocp;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.Token;
 
 // Error listener personalizado para reportar erros léxicos e sintáticos
 public class MOCPErrorListener extends BaseErrorListener {
@@ -17,20 +18,17 @@ public class MOCPErrorListener extends BaseErrorListener {
                           RecognitionException e) {
     numErros++;
 
-    // Se for erro léxico (token inválido)
-    if (offendingSymbol instanceof Token token &&
-      token.getType() == MOCLexer.ERROR) {
-      System.err.println("Erro léxico: caractere inválido '" +
-        token.getText() + "' na linha " + line +
-          ", coluna " + charPositionInLine);
+    // Se a mensagem contiver "token recognition error", é um erro léxico
+    if (msg != null && msg.contains("token recognition error")) {
+      System.err.println("Erro léxico: " + msg + " na linha " + line + ", coluna " + charPositionInLine);
       return;
-        }
+    }
 
-    // Caso contrário, é um erro sintático normal
+    // se não, trata como um erro sintático normal
     System.err.println("Erro na linha " + line + ", coluna " + charPositionInLine + ": " + msg);
   }
 
-  // Retorna true se foram encontrados erros durante a análise
+  // Retorna true se encontrar erros durante a análise
   public boolean temErros() {
     return numErros > 0;
   }
@@ -39,5 +37,4 @@ public class MOCPErrorListener extends BaseErrorListener {
   public int getNumErros() {
     return numErros;
   }
-
 }
