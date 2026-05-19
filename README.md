@@ -1,5 +1,17 @@
 # Compilador MOCP
-Nesta fase, o programa gera uma árvore sintática abstrata de um programa escrito na linguagem MOCP usando a ferramenta ANTLR.
+Implementação de um compilador para a linguagem MOCP, uma variante da linguagem C com sintaxe em português.
+
+## Arquitetura
+O compilador segue um pipeline estruturado:
+1. **Frontend:** Parsing e construção da Árvore Sintática Abstrata (AST) através do ANTLR4.
+2. **Análise Semântica:** Validação de tipos, verificação de escopos e consistência de declarações.
+3. **Backend (TAC):** Geração de Código de Três Endereços.
+4. **Otimizador:** Aplicação de técnicas de dobramento de constantes, propagação de constantes e eliminação de código morto (ponto fixo).
+
+## Requisitos
+- Java JDK 17 ou superior
+- ANTLR 4.13.2
+- GNU Make
 
 ## Como correr o programa
 ### Passo 1
