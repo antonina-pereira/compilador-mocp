@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 import mocp.ast.ASTNode;
 import mocp.semantic.SemanticAnalyzer;
+import java.util.List;
 
 public class Main {
 
@@ -47,12 +48,24 @@ public class Main {
     System.out.println("AST:");
     ast.print("");
 
+    // Executa o Analisador Semântico
     SemanticAnalyzer analisadorSemantico = new SemanticAnalyzer();
     analisadorSemantico.analisar(ast);
 
-    // Depois da analise semântica terminar, gerar o Three Address Code:
+    // Executa o Gerador de Código TAC
     mocp.tac.TACGenerator geradorTac = new mocp.tac.TACGenerator();
-    geradorTac.gerar(ast);
+    List<mocp.tac.Instruction> tacOriginal = geradorTac.gerar(ast);
 
+    // Executa o Otimizador de Código (NOVO!)
+    mocp.optimizer.Optimizer otimizador = new mocp.optimizer.Optimizer();
+    List<mocp.tac.Instruction> tacOtimizado = otimizador.otimizar(tacOriginal);
+
+    // 4. Imprime o resultado final otimizado
+    System.out.println("\n--- CÓDIGO INTERMÉDIO OTIMIZADO (TAC) ---");
+    System.out.println("---------------------------------------------------");
+    for (mocp.tac.Instruction i : tacOtimizado) {
+      System.out.println(i.toString());
+    }
+    System.out.println("---------------------------------------------------");
   }
 }

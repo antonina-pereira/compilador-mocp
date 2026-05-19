@@ -88,7 +88,6 @@ public class TACGenerator {
     }
 
     // Devolve o temporário (t1, t2) ou o ID (x, y) da expressão
-    // Devolve o temporário (t1, t2) ou o ID (x, y) da expressão
     private String gerarExpressao(ASTNode no) {
         if (no == null) return null;
 
@@ -99,7 +98,7 @@ public class TACGenerator {
             return gerarOpBin((OpBinNode) no);
         }
 
-        // CORREÇÃO: Como o teu getValor() já devolve String, basta chamá-lo diretamente!
+        // Ajustado para classe LiteralIntNode
         if (no instanceof LiteralIntNode) {
             return ((LiteralIntNode) no).getValor();
         }

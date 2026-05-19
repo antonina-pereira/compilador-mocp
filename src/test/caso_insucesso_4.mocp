@@ -1,0 +1,12 @@
+vazio principal() {
+    inteiro x;
+    inteiro y;
+    inteiro resultado;
+
+    x = 2 + 3;          /* Constant Folding deve transformar isto em 5! */
+    y = x * 2;          /* Constant Propagation deve ver que x=5 e calcular 5 * 2 = 10! */
+
+    retornar;           /* Encerra a função aqui */
+
+    resultado = y + 10; /* Dead Code Elimination deve REMOVER isto por estar depois do retornar! */
+}
