@@ -15,11 +15,19 @@ public class ChamadaFuncaoNode extends ASTNode {
         if (arg != null) argumentos.add(arg);
     }
 
+    public String getNome() {
+        return nome;
+    }
+
+    public List<ASTNode> getArgumentos() {
+        return argumentos;
+    }
+
     @Override
     public void print(String indent) {
         System.out.println(indent + "Chamada Funcao: " + nome);
         for (ASTNode arg : argumentos) {
-            arg.print(indent + "  [Arg]: ");
+            if (arg != null) arg.print(indent + "  [Arg]: ");
         }
     }
 }

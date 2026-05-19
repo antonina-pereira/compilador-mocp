@@ -9,6 +9,16 @@ public class AcessoVetorNode extends ASTNode {
         this.indice = indice;
     }
 
+    // O TACGenerator usa getId()
+    public String getId() {
+        return id;
+    }
+
+    // O TACGenerator usa getIndice()
+    public ASTNode getIndice() {
+        return indice;
+    }
+
     @Override
     public void print(String indent) {
         System.out.println(indent + "Acesso Vetor: " + id);
