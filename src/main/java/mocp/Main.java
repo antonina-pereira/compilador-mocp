@@ -28,8 +28,12 @@ public class Main {
     parser.removeErrorListeners();
     parser.addErrorListener(errorListener);
 
-    // Gerar a árvore sintática abstrata
+    // Gerar a parse tree
     ParseTree tree = parser.programa();
+
+    // Construir a AST
+    ASTBuilder builder = new ASTBuilder();
+    ASTNode ast = builder.visit(tree);
 
     // Verificar se foram encontrados erros
     if(errorListener.temErros()) {
@@ -37,7 +41,9 @@ public class Main {
       System.exit(1);
     }
 
-    // Imprimir a árvore sintática abstrata (apenas se não houver erros)
-    System.out.println(tree.toStringTree(parser));
+    // Imprimir a AST (apenas se não houver erros)
+    System.out.println("AST:");
+    ast.print("");
+
   }
 }

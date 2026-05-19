@@ -16,6 +16,17 @@ public class MOCPErrorListener extends BaseErrorListener {
                           String msg,
                           RecognitionException e) {
     numErros++;
+
+    // Se for erro léxico (token inválido)
+    if (offendingSymbol instanceof Token token &&
+      token.getType() == MOCLexer.ERROR) {
+      System.err.println("Erro léxico: caractere inválido '" +
+        token.getText() + "' na linha " + line +
+          ", coluna " + charPositionInLine);
+      return;
+        }
+
+    // Caso contrário, é um erro sintático normal
     System.err.println("Erro na linha " + line + ", coluna " + charPositionInLine + ": " + msg);
   }
 
@@ -28,4 +39,5 @@ public class MOCPErrorListener extends BaseErrorListener {
   public int getNumErros() {
     return numErros;
   }
+
 }

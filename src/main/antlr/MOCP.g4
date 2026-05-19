@@ -1,12 +1,17 @@
 grammar MOCP;
 
+// Ativar o visitor
+options {
+  visitor = true;
+}
+
 /* Parser Rules */
 
 // Programa
 programa
-  : (declaracao
+  : (definicaoPrototipo
   | definicaoFuncao
-  | afirmacao
+  | declaracao 
   )* EOF
   ;
 
@@ -27,12 +32,22 @@ listaDeclarador
   ;
 
 declarador
-  : ID (ECOLCHETE NUM_INTEIRO DCOLCHETE)* (ATRIBUIR expressao)?
+  : ID (ECOLCHETE (NUM_INTEIRO)? DCOLCHETE)* (ATRIBUIR inicializador)?
+  ;
+
+inicializador
+  : expressao
+  | ECOLCHETE (expressao (VIRGULA expressao)*)? DCOLCHETE
+  ;
+
+// Definição de protótipos
+definicaoPrototipo
+  : especificadorTipo ID EPAREN listaParametro? DPAREN SEMIVIRGULA
   ;
 
 // Definição de funções
 definicaoFuncao
-  : especificadorTipo ID EPAREN listaParametro? DPAREN afirmacaoComposta?
+  : especificadorTipo ID EPAREN listaParametro? DPAREN afirmacaoComposta
   ;
 
 // Chamada de funções
@@ -145,7 +160,7 @@ fragment DIGITO : [0-9] ;
 
 NUM_INTEIRO : DIGITO+ ; // Representa números inteiros
 
-NUM_REAL : NUM_INTEIRO '.' NUM_INTEIRO ; // Representa números decimais
+NUM_REAL : DIGITO+ '.' DIGITO+ ; // Representa números decimais
 
 // Um string é reconhecido como uma sequência de caracteres entre aspas
 STRING
@@ -214,4 +229,9 @@ RETORNAR : 'retornar' ;
 
 ID : [a-zA-Z_] [a-zA-Z0-9_]* ; // Identificadores
 
-ANY : . ; // regra catch-all
+ERRO_CHAR
+  : .
+  {
+    setType(ERROR);
+  }
+  ;
