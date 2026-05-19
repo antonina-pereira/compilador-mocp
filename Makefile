@@ -20,8 +20,9 @@ MAIN_CLASS = mocp.Main
 all: antlr compile
 
 antlr:
-	mkdir -p $(GEN_DIR)
-	java -jar $(ANTLR_JAR) -Dlanguage=Java -package $(PACKAGE) -o $(GEN_DIR) $(GRAMMAR)
+	mkdir -p $(GEN_DIR) 
+	#não da para ativar o visitor dentro do ficheiro .g4 entao meti o argumento no comando no ficheiro Makefile.
+	java -jar $(ANTLR_JAR) -Dlanguage=Java -visitor -package $(PACKAGE) -o $(GEN_DIR) $(GRAMMAR)
 
 compile:
 	mkdir -p $(BUILD_DIR)

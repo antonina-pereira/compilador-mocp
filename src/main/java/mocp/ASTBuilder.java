@@ -1,4 +1,6 @@
-public class ASTBuilder extends MOCBaseVisitor<ASTNode> {
+import mocp.ast.*;
+
+public class ASTBuilder extends MOCPBaseVisitor<ASTNode> {
     // Nível superior
     @Override
     public ASTNode visitPrograma(MOCParser.ProgramaContext ctx) {
@@ -46,7 +48,7 @@ public class ASTBuilder extends MOCBaseVisitor<ASTNode> {
         return d;
     }
 
-    @Overriderototipo
+    @Override
     public ASTNode visitDefinicaoFuncao(MOCParser.DeclaracaoContext ctx) {
         DeclaracaoNode d = new DeclaracaoNode();
         d.tipo = ctx.especificadorTipo().getText();
@@ -55,7 +57,7 @@ public class ASTBuilder extends MOCBaseVisitor<ASTNode> {
     }
 
     // Parâmetros e argumentos
-    @Overriderototipo
+    @Override
     public ASTNode visitChamadaFuncao(MOCParser.DeclaracaoContext ctx) {
         DeclaracaoNode d = new DeclaracaoNode();
         d.tipo = ctx.especificadorTipo().getText();
@@ -63,7 +65,7 @@ public class ASTBuilder extends MOCBaseVisitor<ASTNode> {
         return d;
     }
 
-    @Overriderototipo
+    @Override
     public ASTNode visitListaParametro(MOCParser.DeclaracaoContext ctx) {
         DeclaracaoNode d = new DeclaracaoNode();
         d.tipo = ctx.especificadorTipo().getText();
@@ -71,7 +73,7 @@ public class ASTBuilder extends MOCBaseVisitor<ASTNode> {
         return d;
     }
 
-    @Overriderototipo
+    @Override
     public ASTNode visitParametro(MOCParser.DeclaracaoContext ctx) {
         DeclaracaoNode d = new DeclaracaoNode();
         d.tipo = ctx.especificadorTipo().getText();
@@ -79,7 +81,7 @@ public class ASTBuilder extends MOCBaseVisitor<ASTNode> {
         return d;
     }
 
-    @Overriderototipo
+    @Override
     public ASTNode visitListaArgumento(MOCParser.DeclaracaoContext ctx) {
         DeclaracaoNode d = new DeclaracaoNode();
         d.tipo = ctx.especificadorTipo().getText();
@@ -88,7 +90,7 @@ public class ASTBuilder extends MOCBaseVisitor<ASTNode> {
     }
 
     // Afirmações
-    @Overriderototipo
+    @Override
     public ASTNode visitAfirmacaoExpressao(MOCParser.DeclaracaoContext ctx) {
         DeclaracaoNode d = new DeclaracaoNode();
         d.tipo = ctx.especificadorTipo().getText();
@@ -96,7 +98,7 @@ public class ASTBuilder extends MOCBaseVisitor<ASTNode> {
         return d;
     }
 
-    @Overriderototipo
+    @Override
     public ASTNode visitAfirmacaoComposta(MOCParser.DeclaracaoContext ctx) {
         DeclaracaoNode d = new DeclaracaoNode();
         d.tipo = ctx.especificadorTipo().getText();
@@ -104,7 +106,7 @@ public class ASTBuilder extends MOCBaseVisitor<ASTNode> {
         return d;
     }
 
-    @Overriderototipo
+    @Override
     public ASTNode visitAfirmacaoSe(MOCParser.DeclaracaoContext ctx) {
         DeclaracaoNode d = new DeclaracaoNode();
         d.tipo = ctx.especificadorTipo().getText();
@@ -112,7 +114,7 @@ public class ASTBuilder extends MOCBaseVisitor<ASTNode> {
         return d;
     }
 
-    @Overriderototipo
+    @Override
     public ASTNode visitAfirmacaoEnquanto(MOCParser.DeclaracaoContext ctx) {
         DeclaracaoNode d = new DeclaracaoNode();
         d.tipo = ctx.especificadorTipo().getText();
@@ -120,7 +122,7 @@ public class ASTBuilder extends MOCBaseVisitor<ASTNode> {
         return d;
     }
 
-    @Overriderototipo
+    @Override
     public ASTNode visitAfirmacaoPara(MOCParser.DeclaracaoContext ctx) {
         DeclaracaoNode d = new DeclaracaoNode();
         d.tipo = ctx.especificadorTipo().getText();
@@ -128,7 +130,7 @@ public class ASTBuilder extends MOCBaseVisitor<ASTNode> {
         return d;
     }
 
-    @Overriderototipo
+    @Override
     public ASTNode visitAfirmacaoRetornar(MOCParser.DeclaracaoContext ctx) {
         DeclaracaoNode d = new DeclaracaoNode();
         d.tipo = ctx.especificadorTipo().getText();
@@ -137,7 +139,7 @@ public class ASTBuilder extends MOCBaseVisitor<ASTNode> {
     }
 
     // Expressões
-    @Overriderototipo
+    @@Override
     public ASTNode visitExpressao(MOCParser.DeclaracaoContext ctx) {
         DeclaracaoNode d = new DeclaracaoNode();
         d.tipo = ctx.especificadorTipo().getText();
@@ -145,7 +147,7 @@ public class ASTBuilder extends MOCBaseVisitor<ASTNode> {
         return d;
     }
 
-    @Overriderototipo
+    @Override
     public ASTNode visitExpressaoAtribuir(MOCParser.DeclaracaoContext ctx) {
         DeclaracaoNode d = new DeclaracaoNode();
         d.tipo = ctx.especificadorTipo().getText();
@@ -153,7 +155,7 @@ public class ASTBuilder extends MOCBaseVisitor<ASTNode> {
         return d;
     }
 
-    @Overriderototipo
+    @Override
     public ASTNode visitExpressaoOULogica(MOCParser.DeclaracaoContext ctx) {
         DeclaracaoNode d = new DeclaracaoNode();
         d.tipo = ctx.especificadorTipo().getText();
@@ -161,7 +163,7 @@ public class ASTBuilder extends MOCBaseVisitor<ASTNode> {
         return d;
     }
 
-    @Overriderototipo
+    @Override
     public ASTNode visitExpressaoELogica(MOCParser.DeclaracaoContext ctx) {
         DeclaracaoNode d = new DeclaracaoNode();
         d.tipo = ctx.especificadorTipo().getText();
@@ -169,7 +171,7 @@ public class ASTBuilder extends MOCBaseVisitor<ASTNode> {
         return d;
     }
 
-    @Overriderototipo
+    @Override
     public ASTNode visitExpressaoIgualdade(MOCParser.DeclaracaoContext ctx) {
         DeclaracaoNode d = new DeclaracaoNode();
         d.tipo = ctx.especificadorTipo().getText();
@@ -177,7 +179,7 @@ public class ASTBuilder extends MOCBaseVisitor<ASTNode> {
         return d;
     }
 
-    @Overriderototipo
+    @Override
     public ASTNode visitExpressaoRelacional(MOCParser.DeclaracaoContext ctx) {
         DeclaracaoNode d = new DeclaracaoNode();
         d.tipo = ctx.especificadorTipo().getText();
@@ -185,7 +187,7 @@ public class ASTBuilder extends MOCBaseVisitor<ASTNode> {
         return d;
     }
 
-    @Overriderototipo
+    @Override
     public ASTNode visitExpressaoAditiva(MOCParser.DeclaracaoContext ctx) {
         DeclaracaoNode d = new DeclaracaoNode();
         d.tipo = ctx.especificadorTipo().getText();
@@ -193,7 +195,7 @@ public class ASTBuilder extends MOCBaseVisitor<ASTNode> {
         return d;
     }
 
-    @Overriderototipo
+    @Override
     public ASTNode visitExpressaoMultiplicativa(MOCParser.DeclaracaoContext ctx) {
         DeclaracaoNode d = new DeclaracaoNode();
         d.tipo = ctx.especificadorTipo().getText();
@@ -201,7 +203,7 @@ public class ASTBuilder extends MOCBaseVisitor<ASTNode> {
         return d;
     }
 
-    @Overriderototipo
+    @Override
     public ASTNode visitExpressaoUnaria(MOCParser.DeclaracaoContext ctx) {
         DeclaracaoNode d = new DeclaracaoNode();
         d.tipo = ctx.especificadorTipo().getText();
@@ -209,7 +211,7 @@ public class ASTBuilder extends MOCBaseVisitor<ASTNode> {
         return d;
     }
 
-    @Overriderototipo
+    @Override
     public ASTNode visitExpressaoVetor(MOCParser.DeclaracaoContext ctx) {
         DeclaracaoNode d = new DeclaracaoNode();
         d.tipo = ctx.especificadorTipo().getText();
@@ -217,7 +219,7 @@ public class ASTBuilder extends MOCBaseVisitor<ASTNode> {
         return d;
     }
 
-    @Overriderototipo
+    @Override
     public ASTNode visitExpressaoSimples(MOCParser.DeclaracaoContext ctx) {
         DeclaracaoNode d = new DeclaracaoNode();
         d.tipo = ctx.especificadorTipo().getText();

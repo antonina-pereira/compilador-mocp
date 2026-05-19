@@ -1,237 +1,145 @@
+//Efolio B - Equipa: ParseMasters
 grammar MOCP;
 
-// Ativar o visitor
-options {
-  visitor = true;
-}
+// ==========================
+// PARSER (analise sintatica)
+// ==========================
 
-/* Parser Rules */
+// Correção Estrutural: Protótipos antes de funções e variáveis globais
+programa : (prototipo PONTO_VIRG)* (dec_variavel PONTO_VIRG | funcao)* EOF ;
 
-// Programa
-programa
-  : (definicaoPrototipo
-  | definicaoFuncao
-  | declaracao 
-  )* EOF
-  ;
+// Define os tipos de dados básicos
+tipo : T_INTEIRO | T_REAL | T_VAZIO ;
 
-// Especificação dos tipos
-especificadorTipo
-  : INTEIRO
-  | REAL
-  | VAZIO
-  ;
+// Declaração de variáveis
+dec_variavel : tipo dec_item (VIRGULA dec_item)* ;
 
-// Declaração
-declaracao
-  : especificadorTipo listaDeclarador SEMIVIRGULA
-  ;
+dec_item : ID (ABRE_RET INT_VAL? FECHA_RET)? (ATRIB inicializador)? ;
 
-listaDeclarador
-  : declarador (VIRGULA declarador)*
-  ;
+inicializador : expressao | ABRE_CHAV expressao (VIRGULA expressao)* FECHA_CHAV ;
 
-declarador
-  : ID (ECOLCHETE (NUM_INTEIRO)? DCOLCHETE)* (ATRIBUIR inicializador)?
-  ;
+// Correção do Vazio nos Protótipos
+prototipo : tipo (ID | PRINCIPAL) ABRE_PAR prototipo_params? FECHA_PAR ;
 
-inicializador
-  : expressao
-  | ECOLCHETE (expressao (VIRGULA expressao)*)? DCOLCHETE
-  ;
+prototipo_params : param_tipo (VIRGULA param_tipo)* | T_VAZIO ;
 
-// Definição de protótipos
-definicaoPrototipo
-  : especificadorTipo ID EPAREN listaParametro? DPAREN SEMIVIRGULA
-  ;
+// param_tipo já não aceita T_VAZIO individualmente
+param_tipo : tipo (ABRE_RET FECHA_RET)? ;
 
-// Definição de funções
-definicaoFuncao
-  : especificadorTipo ID EPAREN listaParametro? DPAREN afirmacaoComposta
-  ;
+funcao : tipo (ID | PRINCIPAL) ABRE_PAR parametros? FECHA_PAR bloco ;
 
-// Chamada de funções
-chamadaFuncao
-  : ID EPAREN listaArgumento? DPAREN
-  ;
+parametros : param_dec (VIRGULA param_dec)* | T_VAZIO ;
 
-listaParametro
-  : parametro (VIRGULA parametro)*
-  ;
+param_dec : tipo ID (ABRE_RET FECHA_RET)? ;
 
-parametro
-  : especificadorTipo ID? (ECOLCHETE NUM_INTEIRO? DCOLCHETE)*
-  ;
+bloco : ABRE_CHAV instrucao* FECHA_CHAV ;
 
-listaArgumento
-  : expressao (VIRGULA expressao)*
-  ;
+instrucao
+    : dec_variavel PONTO_VIRG
+    | expressao PONTO_VIRG
+    | instrucao_se
+    | instrucao_enquanto
+    | instrucao_para
+    | RETORNAR expressao? PONTO_VIRG
+    ;
 
-// Afirmações
-afirmacao
-  : afirmacaoExpressao
-  | afirmacaoComposta
-  | afirmacaoSe
-  | afirmacaoEnquanto
-  | afirmacaoPara
-  | afirmacaoRetornar
-  ;
+instrucao_se : SE ABRE_PAR expressao FECHA_PAR bloco (SENAO bloco)? ;
 
-afirmacaoExpressao
-  : expressao? SEMIVIRGULA
-  ;
+instrucao_enquanto : ENQUANTO ABRE_PAR expressao FECHA_PAR bloco ;
 
-afirmacaoComposta
-  : ECHAVE (declaracao | afirmacao)* DCHAVE
-  ;
+instrucao_para : PARA ABRE_PAR expressao? PONTO_VIRG expressao? PONTO_VIRG expressao? FECHA_PAR bloco ;
 
-afirmacaoSe
-  : SE EPAREN expressao DPAREN afirmacaoComposta (SENAO afirmacaoComposta)?
-  ;
-
-afirmacaoEnquanto
-  : ENQUANTO EPAREN expressao DPAREN afirmacaoComposta
-  ;
-
-afirmacaoPara
-  : PARA EPAREN expressao? SEMIVIRGULA expressao? SEMIVIRGULA expressao? DPAREN afirmacaoComposta
-  ;
-
-afirmacaoRetornar
-  : RETORNAR expressao? SEMIVIRGULA
-  ;
-
-// Expressões
+// REGRAS DE EXPRESSÃO
+// Nota: exprVetorAtrib tem que aparecer ANTES de exprVetor.
+// No ANTLR a ordem das alternativas define a precedencia: a regra mais
+// especifica tem de vir primeiro, senao 'v[i]' faz match com exprVetor e o
+// parser nunca chega a ver o '=' seguinte para reconhecer atribuicao a vetor.
 expressao
-  : expressaoAtribuir
-  ;
+    : ABRE_PAR expressao FECHA_PAR                                  # exprParenteses
+    | ABRE_PAR tipo FECHA_PAR expressao                             # exprCast
+    | MENOS expressao                                               # exprMenosUnario // Adicionado Menos Unário
+    | NAO_LOGICO expressao                                          # exprNao
+    | expressao (MULT | DIV | MODULO) expressao                     # exprMultDiv
+    | expressao (MAIS | MENOS) expressao                            # exprSomaSub
+    | expressao (MAIOR|MENOR|MAIOR_IGUAL|MENOR_IGUAL) expressao     # exprRelacional
+    | expressao (IGUAL|DIFERENTE) expressao                         # exprIgualdade
+    | expressao E_LOGICO expressao                                  # exprE
+    | expressao OU_LOGICO expressao                                 # exprOu
+    | <assoc=right> ID ABRE_RET expressao FECHA_RET ATRIB expressao # exprVetorAtrib  // Associatividade à direita
+    | ID ABRE_RET expressao FECHA_RET                               # exprVetor       // Separado para associatividade
+    | <assoc=right> ID ATRIB expressao                              # exprAtribuicao  // Associatividade à direita
+    | ID ABRE_PAR lista_args? FECHA_PAR                             # exprChamadaFuncao
+    | INT_VAL                                                       # exprInt
+    | FLOAT_VAL                                                     # exprReal
+    | STRING_VAL                                                    # exprString
+    | CHAR_VAL                                                      # exprChar
+    | ID                                                            # exprId
+    ;
 
-expressaoAtribuir
-  : expressaoOULogica (ATRIBUIR expressaoAtribuir)?
-  ;
+lista_args : expressao (VIRGULA expressao)* ;
 
-expressaoOULogica
-  : expressaoELogica (OU expressaoELogica)*
-  ;
+// ======================
+// LEXER (analise lexica)
+// ======================
 
-expressaoELogica
-  : expressaoIgualdade (E expressaoIgualdade)*
-  ;
+T_INTEIRO : 'inteiro' ;
+T_REAL    : 'real' ;
+T_VAZIO   : 'vazio' ;
+SE        : 'se' ;
+SENAO     : 'senao' ;
+ENQUANTO  : 'enquanto' ;
+PARA      : 'para' ;
+RETORNAR  : 'retornar' ;
+PRINCIPAL : 'principal' ;
 
-expressaoIgualdade
-  : expressaoRelacional ((IGUAL | DIFERENTE) expressaoRelacional)*
-  ;
+// Palavras reservadas para I/O
+LER       : 'ler' ;
+LERC      : 'lerc' ;
+LERS      : 'lers' ;
+ESCREVER  : 'escrever' ;
+ESCREVERC : 'escreverc' ;
+ESCREVERV : 'escreverv' ;
+ESCREVERS : 'escrevers' ;
 
-expressaoRelacional
-  : expressaoAditiva ((MAIOR | MENOR | MAIOR_IGUAL | MENOR_IGUAL) expressaoAditiva)*
-  ;
+// Keywords de C capturadas como erro léxico
+// (Como não estão no parser, se o programador as usar, o parser rejeita)
+ERR_C_KEYWORD : 'int' | 'if' | 'else' | 'while' | 'return' | 'void' | 'float' | 'char' ;
 
-expressaoAditiva
-  : expressaoMultiplicativa ((MAIS | MENOS) expressaoMultiplicativa)*
-  ;
-
-expressaoMultiplicativa
-  : expressaoUnaria ((MULT | DIV | MODULO) expressaoUnaria)*
-  ;
-
-expressaoUnaria
-  : NAO expressaoUnaria
-  | MENOS expressaoUnaria
-  | EPAREN especificadorTipo DPAREN expressaoUnaria
-  | expressaoVetor
-  ;
-
-expressaoVetor
-  : expressaoSimples (ECOLCHETE expressao DCOLCHETE)*
-  ;
-
-expressaoSimples
-  : ID
-  | NUM_INTEIRO
-  | NUM_REAL
-  | STRING
-  | EPAREN expressao DPAREN
-  | chamadaFuncao
-  ;
-
-/* Lexer Rules */
-
-fragment DIGITO : [0-9] ;
-
-NUM_INTEIRO : DIGITO+ ; // Representa números inteiros
-
-NUM_REAL : DIGITO+ '.' DIGITO+ ; // Representa números decimais
-
-// Um string é reconhecido como uma sequência de caracteres entre aspas
-STRING
-  : '"' (~["\\] | '\\' .)* '"'
-  ;
-
-// Espaço em branco e comentários são saltados
-ESPACOBRANCO
-  : [ \t\r\n\f]+ -> skip
-  ;
-
-COMENTARIO_LINHA
-  : '//' ~[\r\n]* -> skip
-  ;
-
-COMENTARIO_BLOCO
-  : '/*' .*? '*/' -> skip
-  ;
-
-// Operadores
-ATRIBUIR : '=' ;
-
-// Operadores aritméticos
-MAIS : '+' ;
-MENOS : '-' ;
-MULT : '*' ;
-DIV : '/' ;
-MODULO : '%' ;
-
-// Operadores lógicos
-E : '&&' ;
-OU : '||' ;
-NAO : '!' ;
-
-// Operadores relacionais
-MENOR : '<' ;
-MAIOR : '>' ;
-MENOR_IGUAL : '<=' ;
+ATRIB       : '=' ;
+MAIS        : '+' ;
+MENOS       : '-' ;
+MULT        : '*' ;
+DIV         : '/' ;
+MODULO      : '%' ;
+MAIOR       : '>' ;
+MENOR       : '<' ;
 MAIOR_IGUAL : '>=' ;
-IGUAL : '==' ;
-DIFERENTE : '!=' ;
+MENOR_IGUAL : '<=' ;
+IGUAL       : '==' ;
+DIFERENTE   : '!=' ;
+E_LOGICO    : '&&' ;
+OU_LOGICO   : '||' ;
+NAO_LOGICO  : '!' ;
 
-// Vírgulas
-VIRGULA : ',' ;
-SEMIVIRGULA : ';' ;
+ABRE_PAR    : '(' ;
+FECHA_PAR   : ')' ;
+ABRE_CHAV   : '{' ;
+FECHA_CHAV  : '}' ;
+ABRE_RET    : '[' ;
+FECHA_RET   : ']' ;
+PONTO_VIRG  : ';' ;
+VIRGULA     : ',' ;
 
-// Parentêses
-EPAREN      : '(' ;
-DPAREN      : ')' ;
-ECHAVE      : '{' ;
-DCHAVE      : '}' ;
-ECOLCHETE      : '[' ;
-DCOLCHETE      : ']' ;
+// ID deve vir sempre depois das palavras reservadas
+ID : [a-zA-Z_][a-zA-Z0-9_]* ;
+INT_VAL   : [0-9]+ ;
+FLOAT_VAL : [0-9]+ '.' [0-9]+ ;
 
-// Tipos
-INTEIRO : 'inteiro' ;
-REAL : 'real' ;
-VAZIO : 'vazio' ;
+// Literais de String e Char com suporte a escapes
+fragment ESCAPE : '\\' [btnfr"'\\] ;
+STRING_VAL : '"' ( ESCAPE | ~['"\\\r\n] )* '"' ;
+CHAR_VAL   : '\'' ( ESCAPE | ~['\'\\\r\n] ) '\'' ;
 
-// Estruturas de controlo
-SE : 'se' ;
-SENAO : 'senao' ;
-ENQUANTO : 'enquanto' ;
-PARA : 'para' ;
-RETORNAR : 'retornar' ;
-
-ID : [a-zA-Z_] [a-zA-Z0-9_]* ; // Identificadores
-
-ERRO_CHAR
-  : .
-  {
-    setType(ERROR);
-  }
-  ;
+WS : [ \t\r\n]+ -> skip ;
+COMMENT : '/*' .*? '*/' -> skip ;
+LINE_COMMENT : '//' ~[\r\n]* -> skip ;
