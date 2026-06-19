@@ -3,7 +3,7 @@ Implementação de um compilador para a linguagem MOCP, uma variante da linguage
 
 ## Arquitetura
 O compilador segue um pipeline estruturado:
-1. **Frontend:** Parsing e construção da Árvore Sintática Abstrata (AST) através do ANTLR4.
+1. **Frontend:** Lexer e Parser e construção da Árvore Sintática Abstrata (AST) através de uma gramática para ANTLR4.
 2. **Análise Semântica:** Validação de tipos, verificação de escopos e consistência de declarações.
 3. **Backend (TAC):** Geração de Código de Três Endereços.
 4. **Otimizador:** Aplicação de técnicas de dobramento de constantes, propagação de constantes e eliminação de código morto (ponto fixo).
