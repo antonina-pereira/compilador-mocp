@@ -6,23 +6,37 @@ package mocp.ast;
  * relacionais (==, !=, <, >, <=, >=) e atribuição (=).
  * O tipo de resultado é anotado pelo analisador semântico.
  */
+
 public class OpBinNode extends ASTNode {
+    private final String operador;
+    private final ASTNode esquerda;
+    private final ASTNode direita;
 
-    public final ASTNode esq;
-    public final String op;
-    public final ASTNode dir;
-    public Tipo tipo = Tipo.DESCONHECIDO;
-
-    public OpBinNode(ASTNode esq, String op, ASTNode dir) {
-        this.esq = esq;
-        this.op = op;
-        this.dir = dir;
+    public OpBinNode(String operador, ASTNode esquerda, ASTNode direita) {
+        this.operador = operador;
+        this.esquerda = esquerda;
+        this.direita = direita;
     }
+
+    // --- GETTERS ADICIONADOS PARA O SEMÂNTICO ---
+    public String getOperador() {
+        return operador;
+    }
+
+    public ASTNode getEsquerda() {
+        return esquerda;
+    }
+
+    public ASTNode getDireita() {
+        return direita;
+    }
+    // --------------------------------------------
 
     @Override
     public void print(String indent) {
-        System.out.println(indent + "OpBin: " + op);
-        esq.print(indent + "  ");
-        dir.print(indent + "  ");
+        System.out.println(indent + "OpBin (" + operador + ")");
+        if (esquerda != null) esquerda.print(indent + "  ");
+        if (direita != null) direita.print(indent + "  ");
     }
 }
+

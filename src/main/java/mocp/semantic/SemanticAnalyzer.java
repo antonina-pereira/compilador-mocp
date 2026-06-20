@@ -1,404 +1,183 @@
 package mocp.semantic;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import mocp.ast.*;
 
-/**
- * Analisador semântico do compilador MOCP.
- *
- * Percorre a AST em dois passos:
- *  1. Registo dos símbolos de topo (variáveis globais, protótipos, assinaturas de funções).
- *  2. Análise dos corpos das funções (verificação de tipos, variáveis não declaradas, etc.).
- *
- * Os erros são recolhidos numa lista e expostos através de {@link #getErros()}.
- */
 public class SemanticAnalyzer {
 
-    private final Scope escopo = new Scope();
-    private final List<String> erros = new ArrayList<>();
+    private SymbolTable tabelaSimbolos = new SymbolTable();
+    private String tipoFuncaoAtual = "";
+    private int numErros = 0;
 
-    // Tipo de retorno da função atualmente em análise
-    private String tipoFuncaoAtual = null;
+    public void analisar(ASTNode raiz) {
+        System.out.println("\n--- A INICIAR ANÁLISE SEMÂNTICA ---");
 
-    // -------------------------------------------------------------------------
-    // API pública
-    // -------------------------------------------------------------------------
+        validarNo(raiz);
 
-    public void analisar(ProgramaNode programa) {
-        registarBuiltins();
-        // Passo 1 — registar todos os símbolos de topo
-        for (ASTNode elem : programa.elementos) {
-            if (elem instanceof DeclaracaoNode) {
-                registarDeclaracao((DeclaracaoNode) elem);
-            } else if (elem instanceof PrototipoNode) {
-                registarPrototipo((PrototipoNode) elem);
-            } else if (elem instanceof FuncaoNode) {
-                registarAssinaturaFuncao((FuncaoNode) elem);
-            }
+        // REGRA DO ENUNCIADO: Verificar se a função principal existe
+        SymbolInfo principal = tabelaSimbolos.procurar("principal");
+        if (principal == null || (principal.getCategoria() != Categoria.FUNCAO && principal.getCategoria() != Categoria.PROTOTIPO)) {
+            reportarErro("A função 'principal' não foi encontrada no programa!");
         }
 
-        // Passo 2 — analisar corpos das funções
-        for (ASTNode elem : programa.elementos) {
-            if (elem instanceof FuncaoNode) {
-                analisarCorpoFuncao((FuncaoNode) elem);
-            }
-        }
-    }
-
-    public boolean temErros() {
-        return !erros.isEmpty();
-    }
-
-    public List<String> getErros() {
-        return erros;
-    }
-
-    // -------------------------------------------------------------------------
-    // Funções integradas (built-ins)
-    // -------------------------------------------------------------------------
-
-    private void registarBuiltins() {
-        // Regista com 0 parâmetros para que a verificação de nArgs seja ignorada
-        registarBuiltin("ler",      "inteiro");
-        registarBuiltin("lerr",     "real");
-        registarBuiltin("lers",     "inteiro");  // lê string/vetor, devolve tamanho
-        registarBuiltin("escrever", "vazio");
-        registarBuiltin("escrevers","vazio");
-        registarBuiltin("escreverr","vazio");
-    }
-
-    private void registarBuiltin(String nome, String tipo) {
-        escopo.adicionar(new SymbolInfo(nome, tipo, SymbolInfo.Categoria.FUNCAO));
-    }
-
-    // -------------------------------------------------------------------------
-    // Registo de símbolos
-    // -------------------------------------------------------------------------
-
-    private void registarDeclaracao(DeclaracaoNode decl) {
-        for (DeclaradorNode d : decl.declaradores) {
-            SymbolInfo.Categoria cat = d.vetor
-                    ? SymbolInfo.Categoria.VETOR
-                    : SymbolInfo.Categoria.VARIAVEL;
-            String tipoSimbolo = d.vetor ? decl.tipo + "[]" : decl.tipo;
-            SymbolInfo info = new SymbolInfo(d.nome, tipoSimbolo, cat);
-            if (!escopo.adicionar(info)) {
-                erro("Variável já declarada no mesmo escopo: '" + d.nome + "'");
-            }
-        }
-    }
-
-    private void registarPrototipo(PrototipoNode proto) {
-        if (escopo.procurar(proto.nome) != null) {
-            // Protótipos duplicados são ignorados silenciosamente (compatível com C)
-            return;
-        }
-        SymbolInfo info = new SymbolInfo(proto.nome, proto.tipo, SymbolInfo.Categoria.FUNCAO);
-        for (ParametroNode p : proto.parametros) {
-            info.adicionarParametro(p.vetor ? p.tipo + "[]" : p.tipo);
-        }
-        escopo.adicionar(info);
-    }
-
-    private void registarAssinaturaFuncao(FuncaoNode func) {
-        SymbolInfo existente = escopo.procurar(func.nome);
-        if (existente != null && existente.getCategoria() == SymbolInfo.Categoria.FUNCAO) {
-            // Já registado via protótipo — verificar consistência do tipo de retorno
-            if (!existente.getTipo().equals(func.tipo)) {
-                erro("Tipo de retorno de '" + func.nome
-                        + "' difere do protótipo declarado");
-            }
-            return;
-        }
-        SymbolInfo info = new SymbolInfo(func.nome, func.tipo, SymbolInfo.Categoria.FUNCAO);
-        for (ParametroNode p : func.parametros) {
-            info.adicionarParametro(p.vetor ? p.tipo + "[]" : p.tipo);
-        }
-        if (!escopo.adicionar(info)) {
-            erro("Função já definida: '" + func.nome + "'");
-        }
-    }
-
-    // -------------------------------------------------------------------------
-    // Análise de funções
-    // -------------------------------------------------------------------------
-
-    private void analisarCorpoFuncao(FuncaoNode func) {
-        tipoFuncaoAtual = func.tipo;
-        escopo.entrarEscopo();
-
-        // Adicionar parâmetros ao escopo da função
-        for (ParametroNode p : func.parametros) {
-            if (p.nome != null) {
-                SymbolInfo.Categoria cat = p.vetor
-                        ? SymbolInfo.Categoria.VETOR
-                        : SymbolInfo.Categoria.PARAMETRO;
-                String tipoSimbolo = p.vetor ? p.tipo + "[]" : p.tipo;
-                SymbolInfo info = new SymbolInfo(p.nome, tipoSimbolo, cat);
-                if (!escopo.adicionar(info)) {
-                    erro("Parâmetro duplicado: '" + p.nome + "' na função '" + func.nome + "'");
-                }
-            }
-        }
-
-        analisarComposta(func.corpo);
-
-        escopo.sairEscopo();
-        tipoFuncaoAtual = null;
-    }
-
-    // -------------------------------------------------------------------------
-    // Análise de afirmações
-    // -------------------------------------------------------------------------
-
-    private void analisarComposta(AfirmacaoCompostaNode bloco) {
-        if (bloco == null) return;
-        escopo.entrarEscopo();
-        for (ASTNode elem : bloco.corpo) {
-            analisarElemento(elem);
-        }
-        escopo.sairEscopo();
-    }
-
-    private void analisarElemento(ASTNode no) {
-        if (no instanceof DeclaracaoNode) {
-            analisarDeclaracaoLocal((DeclaracaoNode) no);
-        } else if (no instanceof AfirmacaoExpressaoNode) {
-            analisarExpressao(((AfirmacaoExpressaoNode) no).expressao);
-        } else if (no instanceof AfirmacaoCompostaNode) {
-            analisarComposta((AfirmacaoCompostaNode) no);
-        } else if (no instanceof SeNode) {
-            analisarSe((SeNode) no);
-        } else if (no instanceof EnquantoNode) {
-            analisarEnquanto((EnquantoNode) no);
-        } else if (no instanceof ParaNode) {
-            analisarPara((ParaNode) no);
-        } else if (no instanceof RetornarNode) {
-            analisarRetornar((RetornarNode) no);
-        }
-        // AfirmacaoNode genérico — delega para os seus filhos, não necessita ação extra
-    }
-
-    private void analisarDeclaracaoLocal(DeclaracaoNode decl) {
-        for (DeclaradorNode d : decl.declaradores) {
-            SymbolInfo.Categoria cat = d.vetor
-                    ? SymbolInfo.Categoria.VETOR
-                    : SymbolInfo.Categoria.VARIAVEL;
-            String tipoSimbolo = d.vetor ? decl.tipo + "[]" : decl.tipo;
-            SymbolInfo info = new SymbolInfo(d.nome, tipoSimbolo, cat);
-            if (!escopo.adicionar(info)) {
-                erro("Variável já declarada no mesmo escopo: '" + d.nome + "'");
-            }
-            if (d.init != null) {
-                for (ASTNode elem : d.init.elementos) {
-                    analisarExpressao(elem);
-                }
-            }
-        }
-    }
-
-    private void analisarSe(SeNode no) {
-        analisarExpressao(no.condicao);
-        analisarComposta(no.entao);
-        if (no.senao != null) analisarComposta(no.senao);
-    }
-
-    private void analisarEnquanto(EnquantoNode no) {
-        analisarExpressao(no.condicao);
-        analisarComposta(no.corpo);
-    }
-
-    private void analisarPara(ParaNode no) {
-        if (no.init != null) analisarExpressao(no.init);
-        if (no.condicao != null) analisarExpressao(no.condicao);
-        if (no.incremento != null) analisarExpressao(no.incremento);
-        analisarComposta(no.corpo);
-    }
-
-    private void analisarRetornar(RetornarNode no) {
-        if (no.expressao != null) {
-            Tipo tipoExpr = analisarExpressao(no.expressao);
-            if (tipoFuncaoAtual != null && tipoFuncaoAtual.equals("vazio")) {
-                erro("Função 'vazio' não pode retornar um valor");
-            }
+        if (numErros == 0) {
+            System.out.println("Análise Semântica concluída com SUCESSO! 0 erros.");
         } else {
-            if (tipoFuncaoAtual != null && !tipoFuncaoAtual.equals("vazio")) {
-                erro("Função '" + tipoFuncaoAtual + "' deve retornar um valor");
+            System.err.println("Análise Semântica FALHOU com " + numErros + " erro(s).");
+        }
+    }
+
+    private void validarNo(ASTNode no) {
+        if (no == null) return;
+
+        if (no instanceof ProgramaNode) {
+            // REGRA DO ENUNCIADO: Os protótipos têm de vir antes de qualquer variável ou função
+            boolean podeTerPrototipo = true;
+
+            for (ASTNode filho : ((ProgramaNode) no).getFilhos()) {
+                if (filho instanceof PrototipoNode) {
+                    if (!podeTerPrototipo) {
+                        reportarErro("Os protótipos devem ser declarados ANTES de qualquer função ou variável global!");
+                    }
+                    validarPrototipo((PrototipoNode) filho);
+                } else {
+                    podeTerPrototipo = false; // Apanhou uma declaração ou função; bloqueia novos protótipos
+                    validarNo(filho);
+                }
+            }
+        }
+        else if (no instanceof DeclaracaoNode) {
+            validarDeclaracao((DeclaracaoNode) no);
+        }
+        else if (no instanceof FuncaoNode) {
+            validarFuncao((FuncaoNode) no);
+        }
+        else if (no instanceof AfirmacaoCompostaNode) {
+            for (ASTNode instr : ((AfirmacaoCompostaNode) no).getInstrucoes()) {
+                validarNo(instr);
+            }
+        }
+        else if (no instanceof SeNode) {
+            validarNo(((SeNode) no).getCondicao());
+            validarNo(((SeNode) no).getBlocoSe());
+            validarNo(((SeNode) no).getBlocoSenao());
+        }
+        else if (no instanceof RetornarNode) {
+            ASTNode expr = ((RetornarNode) no).getExpressao();
+            if (expr != null) validarNo(expr);
+
+            if (tipoFuncaoAtual.equals("vazio") && expr != null) {
+                reportarErro("Incompatibilidade: Uma função do tipo 'vazio' não pode retornar valores!");
+            }
+            if (!tipoFuncaoAtual.equals("vazio") && expr == null) {
+                reportarErro("Incompatibilidade: A função tem o tipo '" + tipoFuncaoAtual + "' mas o 'retornar' está vazio!");
+            }
+        }
+        else if (no instanceof OpBinNode) {
+            validarNo(((OpBinNode) no).getEsquerda());
+            validarNo(((OpBinNode) no).getDireita());
+        }
+        else if (no instanceof IDNode) {
+            validarUsoVariavel((IDNode) no);
+        }
+    }
+
+    private void validarPrototipo(PrototipoNode proto) {
+        String nome = proto.getNome();
+        SymbolInfo info = new SymbolInfo(nome, proto.getTipo(), Categoria.PROTOTIPO);
+        for (String param : proto.getTiposParametros()) {
+            info.addTipoParametro(param);
+        }
+
+        if (!tabelaSimbolos.inserir(info)) {
+            reportarErro("O protótipo '" + nome + "' já foi declarado anteriormente!");
+        }
+    }
+
+    private void validarDeclaracao(DeclaracaoNode decNode) {
+        String tipo = decNode.getTipo();
+        for (ASTNode item : decNode.getItens()) {
+            if (item instanceof DeclaradorNode) {
+                DeclaradorNode declarador = (DeclaradorNode) item;
+                String nome = declarador.getId();
+                SymbolInfo novaVar = new SymbolInfo(nome, tipo, Categoria.VARIAVEL);
+
+                if (!tabelaSimbolos.inserir(novaVar)) {
+                    reportarErro("A variável '" + nome + "' já foi declarada neste escopo!");
+                }
+                if (declarador.getInicializador() != null) {
+                    validarNo(declarador.getInicializador());
+                }
             }
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Análise e inferência de tipo de expressões
-    // -------------------------------------------------------------------------
+    private void validarFuncao(FuncaoNode funcao) {
+        String nome = funcao.getNome();
+        tipoFuncaoAtual = funcao.getTipo();
 
-    private Tipo analisarExpressao(ASTNode no) {
-        if (no == null) return Tipo.VAZIO;
-
-        if (no instanceof LiteralIntNode) {
-            return ((LiteralIntNode) no).tipo; // INTEIRO
+        // 1. Registar função no escopo Global
+        SymbolInfo infoFuncao = new SymbolInfo(nome, tipoFuncaoAtual, Categoria.FUNCAO);
+        if (!tabelaSimbolos.inserir(infoFuncao)) {
+            // Se já existir, pode ser o protótipo! Verificamos:
+            SymbolInfo existente = tabelaSimbolos.procurar(nome);
+            if (existente != null && existente.getCategoria() != Categoria.PROTOTIPO) {
+                reportarErro("Já existe uma declaração com o nome '" + nome + "'!");
+            } else if (existente != null && existente.getCategoria() == Categoria.PROTOTIPO) {
+                // Se era um protótipo, atualizamos a categoria para FUNCAO (já foi implementada)
+                tabelaSimbolos.inserir(infoFuncao);
+            }
         }
 
-        if (no instanceof LiteralRealNode) {
-            return ((LiteralRealNode) no).tipo; // REAL
-        }
+        // 2. Entrar no escopo local da função
+        tabelaSimbolos.enterScope();
 
-        if (no instanceof LiteralStringNode) {
-            return ((LiteralStringNode) no).tipo; // STRING
-        }
+        // 3. Registar os parâmetros da função como variáveis locais no novo escopo!
+        if (funcao.getParametros() != null) {
+            ASTNode params = funcao.getParametros();
+            // No ASTBuilder, nós guardámos a lista de parâmetros dentro de um AfirmacaoCompostaNode
+            if (params instanceof AfirmacaoCompostaNode) {
+                for (ASTNode paramNo : ((AfirmacaoCompostaNode) params).getInstrucoes()) {
+                    if (paramNo instanceof ParametroNode) {
+                        ParametroNode pNode = (ParametroNode) paramNo;
 
-        if (no instanceof IDNode) {
-            return analisarID((IDNode) no);
-        }
+                        // Decide se é VETOR ou VARIAVEL simples
+                        Categoria cat = pNode.isEsVetor() ? Categoria.VETOR : Categoria.VARIAVEL;
+                        SymbolInfo infoParam = new SymbolInfo(pNode.getId(), pNode.getTipo(), cat);
 
-        if (no instanceof OpBinNode) {
-            return analisarOpBin((OpBinNode) no);
-        }
-
-        if (no instanceof OpUnNode) {
-            return analisarOpUn((OpUnNode) no);
-        }
-
-        if (no instanceof ChamadaFuncaoNode) {
-            return analisarChamada((ChamadaFuncaoNode) no);
-        }
-
-        if (no instanceof AcessoVetorNode) {
-            return analisarAcessoVetor((AcessoVetorNode) no);
-        }
-
-        return Tipo.DESCONHECIDO;
-    }
-
-    private Tipo analisarID(IDNode no) {
-        SymbolInfo info = escopo.procurar(no.nome);
-        if (info == null) {
-            erro("Variável não declarada: '" + no.nome + "'");
-            no.tipo = Tipo.DESCONHECIDO;
-            return Tipo.DESCONHECIDO;
-        }
-        Tipo t = stringParaTipo(info.getTipo());
-        no.tipo = t;
-        return t;
-    }
-
-    private Tipo analisarOpBin(OpBinNode no) {
-        Tipo esq = analisarExpressao(no.esq);
-        Tipo dir = analisarExpressao(no.dir);
-
-        Tipo resultado;
-        switch (no.op) {
-            case "=":
-                // Atribuição: tipo é o lado direito; verificar compatibilidade simples
-                if (!compativel(esq, dir)) {
-                    erro("Tipos incompatíveis na atribuição: " + esq + " = " + dir);
+                        // Tenta registar o parâmetro na Tabela de Símbolos (no escopo local)
+                        if (!tabelaSimbolos.inserir(infoParam)) {
+                            reportarErro("O parâmetro '" + pNode.getId() + "' já foi declarado na assinatura desta função!");
+                        }
+                    }
                 }
-                resultado = dir;
-                break;
-            case "&&": case "||": case "==": case "!=":
-            case "<":  case ">":  case "<=": case ">=":
-                // Operadores relacionais/lógicos produzem INTEIRO (0 ou 1)
-                resultado = Tipo.INTEIRO;
-                break;
-            default:
-                // Aritméticos: promover para REAL se algum operando for REAL
-                resultado = promover(esq, dir);
+            }
         }
-        no.tipo = resultado;
-        return resultado;
+
+        // 4. Validar o bloco de código (instruções)
+        if (funcao.getBloco() != null) {
+            validarNo(funcao.getBloco());
+        }
+
+        // 5. Sair do escopo local (destrói as variáveis locais)
+        tabelaSimbolos.exitScope();
+        tipoFuncaoAtual = "";
     }
 
-    private Tipo analisarOpUn(OpUnNode no) {
-        Tipo t = analisarExpressao(no.operando);
-        Tipo resultado;
-        if (no.op.equals("!")) {
-            resultado = Tipo.INTEIRO;
-        } else if (no.op.startsWith("(")) {
-            // Cast: extrai o tipo do operador "(inteiro)" ou "(real)"
-            String castStr = no.op.substring(1, no.op.length() - 1);
-            resultado = stringParaTipo(castStr);
-        } else {
-            resultado = t; // negação aritmética mantém o tipo
-        }
-        no.tipo = resultado;
-        return resultado;
-    }
-
-    private Tipo analisarChamada(ChamadaFuncaoNode no) {
-        SymbolInfo info = escopo.procurar(no.nome);
+    private void validarUsoVariavel(IDNode idNode) {
+        String nome = idNode.getNome();
+        SymbolInfo info = tabelaSimbolos.procurar(nome);
         if (info == null) {
-            erro("Função não declarada: '" + no.nome + "'");
-            no.tipo = Tipo.DESCONHECIDO;
-            return Tipo.DESCONHECIDO;
-        }
-        if (info.getCategoria() != SymbolInfo.Categoria.FUNCAO) {
-            erro("'" + no.nome + "' não é uma função");
-            no.tipo = Tipo.DESCONHECIDO;
-            return Tipo.DESCONHECIDO;
-        }
-
-        // Verificar número de argumentos (funções built-in ignoradas)
-        int nParams = info.getTiposParametros().size();
-        int nArgs = no.argumentos.size();
-        if (nParams > 0 && nArgs != nParams) {
-            erro("Número de argumentos incorreto em chamada a '" + no.nome
-                    + "': esperado " + nParams + ", recebido " + nArgs);
-        }
-
-        for (ASTNode arg : no.argumentos) {
-            analisarExpressao(arg);
-        }
-
-        Tipo t = stringParaTipo(info.getTipo());
-        no.tipo = t;
-        return t;
-    }
-
-    private Tipo analisarAcessoVetor(AcessoVetorNode no) {
-        Tipo base = analisarExpressao(no.base);
-        Tipo idx = analisarExpressao(no.indice);
-        if (idx != Tipo.INTEIRO && idx != Tipo.DESCONHECIDO) {
-            erro("Índice de vetor deve ser inteiro");
-        }
-        // Elemento de INTEIRO_VETOR é INTEIRO, de REAL_VETOR é REAL
-        Tipo elem = (base == Tipo.REAL_VETOR) ? Tipo.REAL : Tipo.INTEIRO;
-        no.tipo = elem;
-        return elem;
-    }
-
-    // -------------------------------------------------------------------------
-    // Utilitários
-    // -------------------------------------------------------------------------
-
-    private Tipo stringParaTipo(String s) {
-        if (s == null) return Tipo.DESCONHECIDO;
-        switch (s) {
-            case "inteiro":   return Tipo.INTEIRO;
-            case "inteiro[]": return Tipo.INTEIRO_VETOR;
-            case "real":      return Tipo.REAL;
-            case "real[]":    return Tipo.REAL_VETOR;
-            case "vazio":     return Tipo.VAZIO;
-            default:          return Tipo.DESCONHECIDO;
+            reportarErro("A variável '" + nome + "' não foi declarada antes de ser utilizada!");
         }
     }
 
-    private Tipo promover(Tipo a, Tipo b) {
-        if (a == Tipo.REAL || b == Tipo.REAL) return Tipo.REAL;
-        if (a == Tipo.INTEIRO || b == Tipo.INTEIRO) return Tipo.INTEIRO;
-        return Tipo.DESCONHECIDO;
+    private void reportarErro(String mensagem) {
+        System.err.println("[Erro Semântico] " + mensagem);
+        numErros++;
     }
 
-    private boolean compativel(Tipo alvo, Tipo origem) {
-        if (alvo == Tipo.DESCONHECIDO || origem == Tipo.DESCONHECIDO) return true;
-        if (alvo == origem) return true;
-        // Permite promover INTEIRO → REAL
-        if (alvo == Tipo.REAL && origem == Tipo.INTEIRO) return true;
-        return false;
-    }
-
-    private void erro(String mensagem) {
-        erros.add("[Semântico] " + mensagem);
+    public boolean houveErros() {
+        return numErros > 0;
     }
 }
+

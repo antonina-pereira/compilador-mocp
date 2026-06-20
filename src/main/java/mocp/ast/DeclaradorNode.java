@@ -5,28 +5,34 @@ package mocp.ast;
  * Ex.: "n", "v[100]", "x = 5", "v[] = {1,2,3}"
  */
 public class DeclaradorNode extends ASTNode {
+    private final String id;
+    private ASTNode inicializador = null;
 
-    public final String nome;
-    public final boolean vetor;
-    public final Integer dimensao;       // null se sem dimensão explícita
-    public final InicializadorNode init; // null se sem inicializador
-
-    public DeclaradorNode(String nome, boolean vetor, Integer dimensao, InicializadorNode init) {
-        this.nome = nome;
-        this.vetor = vetor;
-        this.dimensao = dimensao;
-        this.init = init;
+    public DeclaradorNode(String id) {
+        this.id = id;
     }
+
+    public void setInicializador(ASTNode inicializador) {
+        this.inicializador = inicializador;
+    }
+
+    // --- GETTERS ADICIONADOS PARA O SEMÂNTICO ---
+    public String getId() {
+        return id;
+    }
+
+    public ASTNode getInicializador() {
+        return inicializador;
+    }
+    // --------------------------------------------
 
     @Override
     public void print(String indent) {
-        StringBuilder sb = new StringBuilder(indent + "Declarador: " + nome);
-        if (vetor) {
-            sb.append("[");
-            if (dimensao != null) sb.append(dimensao);
-            sb.append("]");
+        System.out.println(indent + "ID: " + id);
+        if (inicializador != null) {
+            System.out.println(indent + "  Initializador:");
+            inicializador.print(indent + "    ");
         }
-        System.out.println(sb);
-        if (init != null) init.print(indent + "  ");
     }
 }
+

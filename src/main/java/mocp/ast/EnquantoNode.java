@@ -4,22 +4,30 @@ package mocp.ast;
  * Nó que representa um ciclo enquanto.
  * Ex.: "enquanto (x > 0) { ... }"
  */
-public class EnquantoNode extends AfirmacaoNode {
+public class EnquantoNode extends ASTNode {
+    private final ASTNode condicao;
+    private final ASTNode corpo;
 
-    public final ASTNode condicao;
-    public final AfirmacaoCompostaNode corpo;
-
-    public EnquantoNode(ASTNode condicao, AfirmacaoCompostaNode corpo) {
+    public EnquantoNode(ASTNode condicao, ASTNode corpo) {
         this.condicao = condicao;
         this.corpo = corpo;
     }
 
+    // ADICIONA ESTES MÉTODOS:
+    public ASTNode getCondicao() {
+        return condicao;
+    }
+
+    public ASTNode getCorpo() {
+        return corpo;
+    }
+
+
     @Override
     public void print(String indent) {
-        System.out.println(indent + "Enquanto");
-        System.out.println(indent + "  Condicao:");
-        if (condicao != null) condicao.print(indent + "    ");
-        System.out.println(indent + "  Corpo:");
-        if (corpo != null) corpo.print(indent + "    ");
+        System.out.println(indent + "Loop ENQUANTO");
+        if (condicao != null) condicao.print(indent + "  Condicao: ");
+        if (corpo != null) corpo.print(indent + "  Bloco: ");
     }
 }
+

@@ -4,17 +4,26 @@ package mocp.ast;
  * Nó que representa uma afirmação retornar.
  * Ex.: "retornar x * 2;" ou "retornar;" (para funções vazio)
  */
-public class RetornarNode extends AfirmacaoNode {
+public class RetornarNode extends ASTNode {
+    private ASTNode expressao = null;
 
-    public final ASTNode expressao; // null em "retornar;"
-
-    public RetornarNode(ASTNode expressao) {
+    // Permite definir a expressão a retornar (ex: retornar x;)
+    public void setExpressao(ASTNode expressao) {
         this.expressao = expressao;
     }
+
+    // --- GETTERS ADICIONADOS PARA O SEMÂNTICO ---
+    public ASTNode getExpressao() {
+        return expressao;
+    }
+    // --------------------------------------------
 
     @Override
     public void print(String indent) {
         System.out.println(indent + "Retornar");
-        if (expressao != null) expressao.print(indent + "  ");
+        if (expressao != null) {
+            expressao.print(indent + "  ");
+        }
     }
 }
+

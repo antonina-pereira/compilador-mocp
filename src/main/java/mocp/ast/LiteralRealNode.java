@@ -5,16 +5,18 @@ package mocp.ast;
  * Ex.: 3.14, 0.5
  */
 public class LiteralRealNode extends ASTNode {
+    private final String valor;
 
-    public final double valor;
-    public Tipo tipo = Tipo.REAL;
-
-    public LiteralRealNode(double valor) {
+    public LiteralRealNode(String valor) {
         this.valor = valor;
+    }
+
+    public String getValor() {
+        return valor;
     }
 
     @Override
     public void print(String indent) {
-        System.out.println(indent + "LiteralReal: " + valor);
+        System.out.println(indent + "Literal Real: " + valor);
     }
 }

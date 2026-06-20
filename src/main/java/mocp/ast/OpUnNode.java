@@ -6,19 +6,23 @@ package mocp.ast;
  * O tipo de resultado é anotado pelo analisador semântico.
  */
 public class OpUnNode extends ASTNode {
+    private final String operador;
+    private final ASTNode expressao;
 
-    public final String op;          // "!", "-" ou "(inteiro)" / "(real)"
-    public final ASTNode operando;
-    public Tipo tipo = Tipo.DESCONHECIDO;
+    public OpUnNode(String operador, ASTNode expressao) {
+        this.operador = operador;
+        this.expressao = expressao;
+    }
 
-    public OpUnNode(String op, ASTNode operando) {
-        this.op = op;
-        this.operando = operando;
+    public ASTNode getExpressao() {
+        return expressao;
+>>>>>>> origin/jose_barroso
     }
 
     @Override
     public void print(String indent) {
-        System.out.println(indent + "OpUn: " + op);
-        operando.print(indent + "  ");
+        System.out.println(indent + "OpUnaria (" + operador + ")");
+        if (expressao != null) expressao.print(indent + "  ");
     }
 }
+

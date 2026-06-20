@@ -1,6 +1,13 @@
-/* Exemplo de condição */
-se (x > y) {
-y = x;
-} senao {
-x = y;
+inteiro fact(inteiro);
+
+inteiro fact(inteiro k) {
+    se (k <= 1) {
+        retornar 1;
+    } senao {
+        retornar k; /* Agora o 'k' já tem de ser reconhecido! */
+    }
+}
+
+vazio principal(vazio) {
+    inteiro n = 5;
 }

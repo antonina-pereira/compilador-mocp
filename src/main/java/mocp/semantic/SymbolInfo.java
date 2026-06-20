@@ -1,58 +1,40 @@
 package mocp.semantic;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 public class SymbolInfo {
+    private String nome;
+    private String tipo;        // "inteiro", "real", ou "vazio"
+    private Categoria categoria;
 
-    public enum Categoria {
-        VARIAVEL,
-        FUNCAO,
-        PARAMETRO,
-        VETOR
-    }
-
-    private String nome;  // Identificador como x, y, arr
-    private String tipo;  // Tipo semântico como inteiro, real, vazio
-    private Categoria categoria; // Para distinguir variável de função, etc.
-
-    // Para vetores
-    private List<Integer> dimensoes = new ArrayList<>();
-
-    // Para funções
-    private List<String> tiposParametros = new ArrayList<>();
+    // Se for FUNCAO ou PROTOTIPO, guardamos a lista dos tipos dos parâmetros
+    // Ex: para a função fact(inteiro k), esta lista terá ["inteiro"]
+    private List<String> tiposParametros;
 
     public SymbolInfo(String nome, String tipo, Categoria categoria) {
         this.nome = nome;
         this.tipo = tipo;
         this.categoria = categoria;
+        this.tiposParametros = new ArrayList<>();
     }
 
-    // Getters
     public String getNome() { return nome; }
     public String getTipo() { return tipo; }
     public Categoria getCategoria() { return categoria; }
-    public List<Integer> getDimensoes() { return dimensoes; }
+
     public List<String> getTiposParametros() { return tiposParametros; }
 
-    // Para vetores
-    public void adicionarDimensao(int tamanho) {
-        dimensoes.add(tamanho);
+    public void addTipoParametro(String tipoParam) {
+        this.tiposParametros.add(tipoParam);
     }
 
-    // Para funções
-    public void adicionarParametro(String tipo) {
-        tiposParametros.add(tipo);
-    }
-
+    // Método utilitário para facilitar a impressão da tabela (Debug)
     @Override
     public String toString() {
-        return "SymbolInfo{" +
-                "nome='" + nome + '\'' +
-                ", tipo='" + tipo + '\'' +
-                ", categoria=" + categoria +
-                ", dimensoes=" + dimensoes +
-                ", tiposParametros=" + tiposParametros +
-                '}';
+        if (categoria == Categoria.FUNCAO || categoria == Categoria.PROTOTIPO) {
+            return categoria + " " + nome + "(" + String.join(", ", tiposParametros) + ") -> " + tipo;
+        }
+        return categoria + " " + tipo + " " + nome;
     }
 }

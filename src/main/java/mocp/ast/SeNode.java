@@ -4,28 +4,57 @@ package mocp.ast;
  * Nó que representa uma afirmação condicional se/senao.
  * O ramo "senao" é opcional (pode ser null).
  */
-public class SeNode extends AfirmacaoNode {
+public class SeNode extends ASTNode {
+    private ASTNode condicao;
+    private ASTNode blocoSe;
+    private ASTNode blocoSenao = null;
 
-    public final ASTNode condicao;
-    public final AfirmacaoCompostaNode entao;
-    public final AfirmacaoCompostaNode senao; // null se não houver senao
-
-    public SeNode(ASTNode condicao, AfirmacaoCompostaNode entao, AfirmacaoCompostaNode senao) {
+    public void setCondicao(ASTNode condicao) {
         this.condicao = condicao;
-        this.entao = entao;
-        this.senao = senao;
+    }
+
+    public void setBlocoSe(ASTNode blocoSe) {
+        this.blocoSe = blocoSe;
+    }
+
+    public void setBlocoSenao(ASTNode blocoSenao) {
+        this.blocoSenao = blocoSenao;
+    }
+
+    // --- GETTERS ADICIONADOS PARA O SEMÂNTICO ---
+    public ASTNode getCondicao() {
+        return condicao;
+    }
+
+    public ASTNode getBlocoSe() {
+        return blocoSe;
+    }
+
+    public ASTNode getBlocoSenao() {
+        return blocoSenao;
+    }
+
+    public SeNode(ASTNode condicao, ASTNode blocoSe, ASTNode blocoSenao) {
+        this.condicao = condicao;
+        this.blocoSe = blocoSe;
+        this.blocoSenao = blocoSenao;
     }
 
     @Override
     public void print(String indent) {
-        System.out.println(indent + "Se");
-        System.out.println(indent + "  Condicao:");
-        if (condicao != null) condicao.print(indent + "    ");
-        System.out.println(indent + "  Entao:");
-        if (entao != null) entao.print(indent + "    ");
-        if (senao != null) {
+        System.out.println(indent + "Instrucao SE");
+        if (condicao != null) {
+            System.out.println(indent + "  Condicao:");
+            condicao.print(indent + "    ");
+        }
+        if (blocoSe != null) {
+            System.out.println(indent + "  Entao:");
+            blocoSe.print(indent + "    ");
+        }
+        if (blocoSenao != null) {
             System.out.println(indent + "  Senao:");
-            senao.print(indent + "    ");
+            blocoSenao.print(indent + "    ");
         }
     }
 }
+

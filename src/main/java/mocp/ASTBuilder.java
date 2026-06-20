@@ -1,352 +1,158 @@
 package mocp;
 
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.TerminalNode;
-
 import mocp.ast.*;
 
 public class ASTBuilder extends MOCPBaseVisitor<ASTNode> {
 
-    // -------------------------------------------------------------------------
-    // Nível superior
-    // -------------------------------------------------------------------------
-
     @Override
     public ASTNode visitPrograma(MOCPParser.ProgramaContext ctx) {
-        ProgramaNode no = new ProgramaNode();
-        for (ParseTree filho : ctx.children) {
-            if (filho instanceof MOCPParser.DeclaracaoContext
-                    || filho instanceof MOCPParser.DefinicaoPrototipoContext
-                    || filho instanceof MOCPParser.DefinicaoFuncaoContext) {
-                no.adicionar(visit(filho));
-            }
+        ProgramaNode programa = new ProgramaNode();
+        for (int i = 0; i < ctx.getChildCount(); i++) {
+            ASTNode node = visit(ctx.getChild(i));
+            if (node != null) programa.addNode(node);
         }
-        return no;
+        return programa;
     }
 
     @Override
-    public ASTNode visitDeclaracao(MOCPParser.DeclaracaoContext ctx) {
-        String tipo = ctx.especificadorTipo().getText();
-        DeclaracaoNode no = new DeclaracaoNode(tipo);
-        for (MOCPParser.DeclaradorContext d : ctx.listaDeclarador().declarador()) {
-            no.adicionarDeclarador((DeclaradorNode) visit(d));
+    public ASTNode visitDec_variavel(MOCPParser.Dec_variavelContext ctx) {
+        DeclaracaoNode decNode = new DeclaracaoNode(ctx.tipo().getText());
+        for (MOCPParser.Dec_itemContext itemCtx : ctx.dec_item()) {
+            ASTNode item = visit(itemCtx);
+            if (item != null) decNode.addItem(item);
         }
-        return no;
+        return decNode;
     }
 
     @Override
-    public ASTNode visitDeclarador(MOCPParser.DeclaradorContext ctx) {
-        String nome = ctx.ID().getText();
-        boolean vetor = !ctx.ECOLCHETE().isEmpty();
-        Integer dimensao = null;
-        if (!ctx.NUM_INTEIRO().isEmpty()) {
-            dimensao = Integer.parseInt(ctx.NUM_INTEIRO(0).getText());
-        }
-        InicializadorNode init = null;
-        if (ctx.inicializador() != null) {
-            init = (InicializadorNode) visit(ctx.inicializador());
-        }
-        return new DeclaradorNode(nome, vetor, dimensao, init);
+    public ASTNode visitDec_item(MOCPParser.Dec_itemContext ctx) {
+        DeclaradorNode declarador = new DeclaradorNode(ctx.ID().getText());
+        if (ctx.inicializador() != null) declarador.setInicializador(visit(ctx.inicializador()));
+        return declarador;
     }
 
     @Override
     public ASTNode visitInicializador(MOCPParser.InicializadorContext ctx) {
-        if (ctx.ECHAVE() != null) {
-            // Lista: { e1, e2, ... }
-            InicializadorNode no = new InicializadorNode(true);
-            for (MOCPParser.ExpressaoContext e : ctx.expressao()) {
-                no.adicionarElemento(visit(e));
-            }
-            return no;
-        } else {
-            // Expressão simples
-            InicializadorNode no = new InicializadorNode(false);
-            no.adicionarElemento(visit(ctx.expressao(0)));
-            return no;
+        if (ctx.ABRE_CHAV() != null) {
+            AfirmacaoCompostaNode listaInit = new AfirmacaoCompostaNode();
+            for (MOCPParser.ExpressaoContext exprCtx : ctx.expressao()) listaInit.addInstrucao(visit(exprCtx));
+            return listaInit;
         }
+        return visit(ctx.expressao(0));
     }
 
     @Override
-    public ASTNode visitDefinicaoPrototipo(MOCPParser.DefinicaoPrototipoContext ctx) {
-        String tipo = ctx.especificadorTipo().getText();
-        String nome = ctx.ID().getText();
-        PrototipoNode no = new PrototipoNode(tipo, nome);
-        if (ctx.listaParametro() != null) {
-            for (MOCPParser.ParametroContext p : ctx.listaParametro().parametro()) {
-                no.adicionarParametro((ParametroNode) visit(p));
+    public ASTNode visitPrototipo(MOCPParser.PrototipoContext ctx) {
+        PrototipoNode prototipo = new PrototipoNode(ctx.tipo().getText(), ctx.ID() != null ? ctx.ID().getText() : ctx.PRINCIPAL().getText());
+        if (ctx.prototipo_params() != null && ctx.prototipo_params().param_tipo() != null) {
+            for (MOCPParser.Param_tipoContext pt : ctx.prototipo_params().param_tipo()) {
+                prototipo.addTipoParametro(pt.tipo().getText() + (pt.ABRE_RET() != null ? "[]" : ""));
             }
         }
-        return no;
+        return prototipo;
     }
 
     @Override
-    public ASTNode visitDefinicaoFuncao(MOCPParser.DefinicaoFuncaoContext ctx) {
-        String tipo = ctx.especificadorTipo().getText();
-        String nome = ctx.ID().getText();
-        FuncaoNode no = new FuncaoNode(tipo, nome);
-        if (ctx.listaParametro() != null) {
-            for (MOCPParser.ParametroContext p : ctx.listaParametro().parametro()) {
-                no.adicionarParametro((ParametroNode) visit(p));
-            }
+    public ASTNode visitPrototipo_params(MOCPParser.Prototipo_paramsContext ctx) { return null; }
+
+    @Override
+    public ASTNode visitParam_tipo(MOCPParser.Param_tipoContext ctx) { return null; }
+
+    @Override
+    public ASTNode visitFuncao(MOCPParser.FuncaoContext ctx) {
+        FuncaoNode funcao = new FuncaoNode(ctx.tipo().getText(), ctx.ID() != null ? ctx.ID().getText() : ctx.PRINCIPAL().getText());
+        if (ctx.parametros() != null) funcao.setParametros(visit(ctx.parametros()));
+        if (ctx.bloco() != null) funcao.setBloco(visit(ctx.bloco()));
+        return funcao;
+    }
+
+    @Override
+    public ASTNode visitParametros(MOCPParser.ParametrosContext ctx) {
+        if (ctx.T_VAZIO() != null || ctx.param_dec() == null) return null;
+        AfirmacaoCompostaNode listaParams = new AfirmacaoCompostaNode();
+        for (MOCPParser.Param_decContext pCtx : ctx.param_dec()) listaParams.addInstrucao(visit(pCtx));
+        return listaParams;
+    }
+
+    @Override
+    public ASTNode visitParam_dec(MOCPParser.Param_decContext ctx) {
+        return new ParametroNode(ctx.tipo().getText(), ctx.ID().getText(), ctx.ABRE_RET() != null);
+    }
+
+    @Override
+    public ASTNode visitBloco(MOCPParser.BlocoContext ctx) {
+        AfirmacaoCompostaNode bloco = new AfirmacaoCompostaNode();
+        for (MOCPParser.InstrucaoContext instrCtx : ctx.instrucao()) bloco.addInstrucao(visit(instrCtx));
+        return bloco;
+    }
+
+    @Override
+    public ASTNode visitInstrucao(MOCPParser.InstrucaoContext ctx) {
+        if (ctx.RETORNAR() != null) {
+            RetornarNode ret = new RetornarNode();
+            if (ctx.expressao() != null) ret.setExpressao(visit(ctx.expressao()));
+            return ret;
         }
-        no.corpo = (AfirmacaoCompostaNode) visit(ctx.afirmacaoComposta());
-        return no;
-    }
-
-    // -------------------------------------------------------------------------
-    // Parâmetros e argumentos
-    // -------------------------------------------------------------------------
-
-    @Override
-    public ASTNode visitParametro(MOCPParser.ParametroContext ctx) {
-        String tipo = ctx.especificadorTipo().getText();
-        String nome = ctx.ID() != null ? ctx.ID().getText() : null;
-        boolean vetor = !ctx.ECOLCHETE().isEmpty();
-        return new ParametroNode(tipo, nome, vetor);
+        if (ctx.dec_variavel() != null) return visit(ctx.dec_variavel());
+        if (ctx.expressao() != null) return visit(ctx.expressao());
+        if (ctx.instrucao_se() != null) return visit(ctx.instrucao_se());
+        if (ctx.instrucao_enquanto() != null) return visit(ctx.instrucao_enquanto());
+        if (ctx.instrucao_para() != null) return visit(ctx.instrucao_para());
+        return null;
     }
 
     @Override
-    public ASTNode visitChamadaFuncao(MOCPParser.ChamadaFuncaoContext ctx) {
-        String nome = ctx.ID().getText();
-        ChamadaFuncaoNode no = new ChamadaFuncaoNode(nome);
-        if (ctx.listaArgumento() != null) {
-            for (MOCPParser.ExpressaoContext e : ctx.listaArgumento().expressao()) {
-                no.adicionarArgumento(visit(e));
-            }
-        }
-        return no;
+    public ASTNode visitInstrucao_se(MOCPParser.Instrucao_seContext ctx) {
+        return new SeNode(visit(ctx.expressao()), visit(ctx.bloco(0)), (ctx.SENAO() != null && ctx.bloco().size() > 1) ? visit(ctx.bloco(1)) : null);
     }
 
     @Override
-    public ASTNode visitListaParametro(MOCPParser.ListaParametroContext ctx) {
-        return visitChildren(ctx);
+    public ASTNode visitInstrucao_enquanto(MOCPParser.Instrucao_enquantoContext ctx) {
+        return new EnquantoNode(visit(ctx.expressao()), visit(ctx.bloco()));
     }
 
     @Override
-    public ASTNode visitListaArgumento(MOCPParser.ListaArgumentoContext ctx) {
-        return visitChildren(ctx);
-    }
-
-    // -------------------------------------------------------------------------
-    // Afirmações
-    // -------------------------------------------------------------------------
-
-    @Override
-    public ASTNode visitAfirmacaoExpressao(MOCPParser.AfirmacaoExpressaoContext ctx) {
-        ASTNode expr = ctx.expressao() != null ? visit(ctx.expressao()) : null;
-        return new AfirmacaoExpressaoNode(expr);
+    public ASTNode visitInstrucao_para(MOCPParser.Instrucao_paraContext ctx) {
+        ASTNode init = null, cond = null, inc = null;
+        int count = ctx.expressao().size();
+        if (count == 3) { init = visit(ctx.expressao(0)); cond = visit(ctx.expressao(1)); inc = visit(ctx.expressao(2)); }
+        else if (count == 2) {
+            if (ctx.getChild(2).getText().equals(";")) { init = visit(ctx.expressao(0)); inc = visit(ctx.expressao(1)); }
+            else { init = visit(ctx.expressao(0)); cond = visit(ctx.expressao(1)); }
+        } else if (count == 1) cond = visit(ctx.expressao(0));
+        return new ParaNode(init, cond, inc, visit(ctx.bloco()));
     }
 
     @Override
-    public ASTNode visitAfirmacaoComposta(MOCPParser.AfirmacaoCompostaContext ctx) {
-        AfirmacaoCompostaNode no = new AfirmacaoCompostaNode();
-        for (ParseTree filho : ctx.children) {
-            if (filho instanceof MOCPParser.DeclaracaoContext
-                    || filho instanceof MOCPParser.AfirmacaoContext) {
-                no.adicionar(visit(filho));
-            }
-        }
-        return no;
+    public ASTNode visitLista_args(MOCPParser.Lista_argsContext ctx) {
+        if (ctx.expressao() == null) return null;
+        AfirmacaoCompostaNode listaArgs = new AfirmacaoCompostaNode();
+        for (MOCPParser.ExpressaoContext eCtx : ctx.expressao()) listaArgs.addInstrucao(visit(eCtx));
+        return listaArgs;
     }
 
-    @Override
-    public ASTNode visitAfirmacaoSe(MOCPParser.AfirmacaoSeContext ctx) {
-        ASTNode cond = visit(ctx.expressao());
-        AfirmacaoCompostaNode entao = (AfirmacaoCompostaNode) visit(ctx.afirmacaoComposta(0));
-        AfirmacaoCompostaNode senao = ctx.afirmacaoComposta().size() > 1
-                ? (AfirmacaoCompostaNode) visit(ctx.afirmacaoComposta(1))
-                : null;
-        return new SeNode(cond, entao, senao);
+    @Override public ASTNode visitExprParenteses(MOCPParser.ExprParentesesContext ctx) { return visit(ctx.expressao()); }
+    @Override public ASTNode visitExprCast(MOCPParser.ExprCastContext ctx) { return new OpUnNode("(cast para " + ctx.tipo().getText() + ")", visit(ctx.expressao())); }
+    @Override public ASTNode visitExprMenosUnario(MOCPParser.ExprMenosUnarioContext ctx) { return new OpUnNode("-", visit(ctx.expressao())); }
+    @Override public ASTNode visitExprNao(MOCPParser.ExprNaoContext ctx) { return new OpUnNode("!", visit(ctx.expressao())); }
+    @Override public ASTNode visitExprMultDiv(MOCPParser.ExprMultDivContext ctx) { return new OpBinNode(ctx.getChild(1).getText(), visit(ctx.expressao(0)), visit(ctx.expressao(1))); }
+    @Override public ASTNode visitExprSomaSub(MOCPParser.ExprSomaSubContext ctx) { return new OpBinNode(ctx.getChild(1).getText(), visit(ctx.expressao(0)), visit(ctx.expressao(1))); }
+    @Override public ASTNode visitExprRelacional(MOCPParser.ExprRelacionalContext ctx) { return new OpBinNode(ctx.getChild(1).getText(), visit(ctx.expressao(0)), visit(ctx.expressao(1))); }
+    @Override public ASTNode visitExprIgualdade(MOCPParser.ExprIgualdadeContext ctx) { return new OpBinNode(ctx.getChild(1).getText(), visit(ctx.expressao(0)), visit(ctx.expressao(1))); }
+    @Override public ASTNode visitExprE(MOCPParser.ExprEContext ctx) { return new OpBinNode("&&", visit(ctx.expressao(0)), visit(ctx.expressao(1))); }
+    @Override public ASTNode visitExprOu(MOCPParser.ExprOuContext ctx) { return new OpBinNode("||", visit(ctx.expressao(0)), visit(ctx.expressao(1))); }
+    @Override public ASTNode visitExprVetorAtrib(MOCPParser.ExprVetorAtribContext ctx) { return new OpBinNode("=", new AcessoVetorNode(ctx.ID().getText(), visit(ctx.expressao(0))), visit(ctx.expressao(1))); }
+    @Override public ASTNode visitExprVetor(MOCPParser.ExprVetorContext ctx) { return new AcessoVetorNode(ctx.ID().getText(), visit(ctx.expressao())); }
+    @Override public ASTNode visitExprAtribuicao(MOCPParser.ExprAtribuicaoContext ctx) { return new OpBinNode("=", new IDNode(ctx.ID().getText()), visit(ctx.expressao())); }
+    @Override public ASTNode visitExprChamadaFuncao(MOCPParser.ExprChamadaFuncaoContext ctx) {
+        ChamadaFuncaoNode chamada = new ChamadaFuncaoNode(ctx.ID().getText());
+        if (ctx.lista_args() != null) for (MOCPParser.ExpressaoContext exprCtx : ctx.lista_args().expressao()) chamada.addArgumento(visit(exprCtx));
+        return chamada;
     }
-
-    @Override
-    public ASTNode visitAfirmacaoEnquanto(MOCPParser.AfirmacaoEnquantoContext ctx) {
-        ASTNode cond = visit(ctx.expressao());
-        AfirmacaoCompostaNode corpo = (AfirmacaoCompostaNode) visit(ctx.afirmacaoComposta());
-        return new EnquantoNode(cond, corpo);
-    }
-
-    @Override
-    public ASTNode visitAfirmacaoPara(MOCPParser.AfirmacaoParaContext ctx) {
-        // afirmacaoPara: PARA EPAREN expressao? SEMIVIRGULA expressao? SEMIVIRGULA expressao? DPAREN afirmacaoComposta
-        // Determina init/cond/incr pela posição relativa às SEMIVIRGULA
-        ASTNode init = null, cond = null, incr = null;
-        int semiCount = 0;
-        for (ParseTree filho : ctx.children) {
-            if (filho instanceof TerminalNode) {
-                if (((TerminalNode) filho).getSymbol().getType() == MOCPParser.SEMIVIRGULA) {
-                    semiCount++;
-                }
-            } else if (filho instanceof MOCPParser.ExpressaoContext) {
-                ASTNode expr = visit(filho);
-                if (semiCount == 0) init = expr;
-                else if (semiCount == 1) cond = expr;
-                else incr = expr;
-            }
-        }
-        AfirmacaoCompostaNode corpo = (AfirmacaoCompostaNode) visit(ctx.afirmacaoComposta());
-        return new ParaNode(init, cond, incr, corpo);
-    }
-
-    @Override
-    public ASTNode visitAfirmacaoRetornar(MOCPParser.AfirmacaoRetornarContext ctx) {
-        ASTNode expr = ctx.expressao() != null ? visit(ctx.expressao()) : null;
-        return new RetornarNode(expr);
-    }
-
-    // -------------------------------------------------------------------------
-    // Expressões
-    // -------------------------------------------------------------------------
-
-    @Override
-    public ASTNode visitExpressao(MOCPParser.ExpressaoContext ctx) {
-        return visit(ctx.expressaoAtribuir());
-    }
-
-    @Override
-    public ASTNode visitExpressaoAtribuir(MOCPParser.ExpressaoAtribuirContext ctx) {
-        ASTNode esq = visit(ctx.expressaoOULogica());
-        if (ctx.expressaoAtribuir() != null) {
-            return new OpBinNode(esq, "=", visit(ctx.expressaoAtribuir()));
-        }
-        return esq;
-    }
-
-    @Override
-    public ASTNode visitExpressaoOULogica(MOCPParser.ExpressaoOULogicaContext ctx) {
-        java.util.List<MOCPParser.ExpressaoELogicaContext> ops = ctx.expressaoELogica();
-        ASTNode result = visit(ops.get(0));
-        for (int i = 1; i < ops.size(); i++) {
-            result = new OpBinNode(result, "||", visit(ops.get(i)));
-        }
-        return result;
-    }
-
-    @Override
-    public ASTNode visitExpressaoELogica(MOCPParser.ExpressaoELogicaContext ctx) {
-        java.util.List<MOCPParser.ExpressaoIgualdadeContext> ops = ctx.expressaoIgualdade();
-        ASTNode result = visit(ops.get(0));
-        for (int i = 1; i < ops.size(); i++) {
-            result = new OpBinNode(result, "&&", visit(ops.get(i)));
-        }
-        return result;
-    }
-
-    @Override
-    public ASTNode visitExpressaoIgualdade(MOCPParser.ExpressaoIgualdadeContext ctx) {
-        java.util.List<MOCPParser.ExpressaoRelacionalContext> ops = ctx.expressaoRelacional();
-        ASTNode result = visit(ops.get(0));
-        // Recolhe os operadores (== ou !=) pela ordem em que aparecem nos filhos
-        java.util.List<String> operadores = new java.util.ArrayList<>();
-        for (ParseTree filho : ctx.children) {
-            if (filho instanceof TerminalNode) {
-                int tipo = ((TerminalNode) filho).getSymbol().getType();
-                if (tipo == MOCPParser.IGUAL) operadores.add("==");
-                else if (tipo == MOCPParser.DIFERENTE) operadores.add("!=");
-            }
-        }
-        for (int i = 1; i < ops.size(); i++) {
-            result = new OpBinNode(result, operadores.get(i - 1), visit(ops.get(i)));
-        }
-        return result;
-    }
-
-    @Override
-    public ASTNode visitExpressaoRelacional(MOCPParser.ExpressaoRelacionalContext ctx) {
-        java.util.List<MOCPParser.ExpressaoAditivaContext> ops = ctx.expressaoAditiva();
-        ASTNode result = visit(ops.get(0));
-        java.util.List<String> operadores = new java.util.ArrayList<>();
-        for (ParseTree filho : ctx.children) {
-            if (filho instanceof TerminalNode) {
-                int tipo = ((TerminalNode) filho).getSymbol().getType();
-                if (tipo == MOCPParser.MAIOR) operadores.add(">");
-                else if (tipo == MOCPParser.MENOR) operadores.add("<");
-                else if (tipo == MOCPParser.MAIOR_IGUAL) operadores.add(">=");
-                else if (tipo == MOCPParser.MENOR_IGUAL) operadores.add("<=");
-            }
-        }
-        for (int i = 1; i < ops.size(); i++) {
-            result = new OpBinNode(result, operadores.get(i - 1), visit(ops.get(i)));
-        }
-        return result;
-    }
-
-    @Override
-    public ASTNode visitExpressaoAditiva(MOCPParser.ExpressaoAditivaContext ctx) {
-        java.util.List<MOCPParser.ExpressaoMultiplicativaContext> ops = ctx.expressaoMultiplicativa();
-        ASTNode result = visit(ops.get(0));
-        java.util.List<String> operadores = new java.util.ArrayList<>();
-        for (ParseTree filho : ctx.children) {
-            if (filho instanceof TerminalNode) {
-                int tipo = ((TerminalNode) filho).getSymbol().getType();
-                if (tipo == MOCPParser.MAIS) operadores.add("+");
-                else if (tipo == MOCPParser.MENOS) operadores.add("-");
-            }
-        }
-        for (int i = 1; i < ops.size(); i++) {
-            result = new OpBinNode(result, operadores.get(i - 1), visit(ops.get(i)));
-        }
-        return result;
-    }
-
-    @Override
-    public ASTNode visitExpressaoMultiplicativa(MOCPParser.ExpressaoMultiplicativaContext ctx) {
-        java.util.List<MOCPParser.ExpressaoUnariaContext> ops = ctx.expressaoUnaria();
-        ASTNode result = visit(ops.get(0));
-        java.util.List<String> operadores = new java.util.ArrayList<>();
-        for (ParseTree filho : ctx.children) {
-            if (filho instanceof TerminalNode) {
-                int tipo = ((TerminalNode) filho).getSymbol().getType();
-                if (tipo == MOCPParser.MULT) operadores.add("*");
-                else if (tipo == MOCPParser.DIV) operadores.add("/");
-                else if (tipo == MOCPParser.MODULO) operadores.add("%");
-            }
-        }
-        for (int i = 1; i < ops.size(); i++) {
-            result = new OpBinNode(result, operadores.get(i - 1), visit(ops.get(i)));
-        }
-        return result;
-    }
-
-    @Override
-    public ASTNode visitExpressaoUnaria(MOCPParser.ExpressaoUnariaContext ctx) {
-        if (ctx.NAO() != null) {
-            return new OpUnNode("!", visit(ctx.expressaoUnaria()));
-        } else if (ctx.MENOS() != null) {
-            return new OpUnNode("-", visit(ctx.expressaoUnaria()));
-        } else if (ctx.especificadorTipo() != null) {
-            String cast = "(" + ctx.especificadorTipo().getText() + ")";
-            return new OpUnNode(cast, visit(ctx.expressaoUnaria()));
-        } else {
-            return visit(ctx.expressaoVetor());
-        }
-    }
-
-    @Override
-    public ASTNode visitExpressaoVetor(MOCPParser.ExpressaoVetorContext ctx) {
-        ASTNode base = visit(ctx.expressaoSimples());
-        for (MOCPParser.ExpressaoContext idx : ctx.expressao()) {
-            base = new AcessoVetorNode(base, visit(idx));
-        }
-        return base;
-    }
-
-    @Override
-    public ASTNode visitExpressaoSimples(MOCPParser.ExpressaoSimplesContext ctx) {
-        if (ctx.chamadaFuncao() != null) {
-            return visit(ctx.chamadaFuncao());
-        } else if (ctx.expressao() != null) {
-            return visit(ctx.expressao());
-        } else if (ctx.ID() != null) {
-            return new IDNode(ctx.ID().getText());
-        } else if (ctx.NUM_INTEIRO() != null) {
-            return new LiteralIntNode(Integer.parseInt(ctx.NUM_INTEIRO().getText()));
-        } else if (ctx.NUM_REAL() != null) {
-            return new LiteralRealNode(Double.parseDouble(ctx.NUM_REAL().getText()));
-        } else {
-            // STRING — remove as aspas delimitadoras
-            String raw = ctx.STRING().getText();
-            return new LiteralStringNode(raw.substring(1, raw.length() - 1));
-        }
-    }
+    @Override public ASTNode visitExprInt(MOCPParser.ExprIntContext ctx) { return new LiteralIntNode(ctx.INT_VAL().getText()); }
+    @Override public ASTNode visitExprReal(MOCPParser.ExprRealContext ctx) { return new LiteralRealNode(ctx.FLOAT_VAL().getText()); }
+    @Override public ASTNode visitExprString(MOCPParser.ExprStringContext ctx) { return new LiteralStringNode(ctx.STRING_VAL().getText()); }
+    @Override public ASTNode visitExprChar(MOCPParser.ExprCharContext ctx) { return new LiteralStringNode(ctx.CHAR_VAL().getText()); }
+    @Override public ASTNode visitExprId(MOCPParser.ExprIdContext ctx) { return new IDNode(ctx.ID().getText()); }
 }
+

@@ -1,55 +1,36 @@
-// Gere uma pilha de tabelas de símbolos permitindo escopos aninhados
-// Por exemplo: global -> função -> bloco
-
 package mocp.semantic;
 
-import java.util.Stack;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class Scope {
-
-    private Stack<SymbolTable> pilha;
+    // Usamos LinkedHashMap para manter a ordem em que as variáveis foram declaradas
+    private Map<String, SymbolInfo> simbolos;
 
     public Scope() {
-        pilha = new Stack<>();
-        // Escopo global
-        pilha.push(new SymbolTable());
+        this.simbolos = new LinkedHashMap<>();
     }
 
-    // Entrar num novo escopo (ex: função, bloco)
-    public void entrarEscopo() {
-        pilha.push(new SymbolTable());
+    // Insere um símbolo apenas neste escopo
+    public void inserir(SymbolInfo simbolo) {
+        simbolos.put(simbolo.getNome(), simbolo);
     }
 
-    // Sair do escopo atual
-    public void sairEscopo() {
-        if (pilha.size() > 1) {
-            pilha.pop();
+    // Procura um símbolo apenas neste escopo
+    public SymbolInfo procurarLocal(String nome) {
+        return simbolos.get(nome);
+    }
+
+    // Verifica se já existe algo com este nome NESTE escopo específico
+    public boolean existeLocal(String nome) {
+        return simbolos.containsKey(nome);
+    }
+
+    // Método utilitário para imprimir o conteúdo do escopo (Debug)
+    public void printScope(String indent) {
+        for (SymbolInfo info : simbolos.values()) {
+            System.out.println(indent + info.toString());
         }
-    }
-
-    // Inserir símbolo no escopo atual
-    public boolean adicionar(SymbolInfo simbolo) {
-        return pilha.peek().inserir(simbolo);
-    }
-
-    // Procurar símbolo em todos os escopos (de cima para baixo)
-    public SymbolInfo procurar(String nome) {
-        for (int i = pilha.size() - 1; i >= 0; i--) {
-            SymbolTable tabela = pilha.get(i);
-            if (tabela.existe(nome)) {
-                return tabela.obter(nome);
-            }
-        }
-        return null;
-    }
-
-    // Verificar se existe no escopo atual
-    public boolean existeNoEscopoAtual(String nome) {
-        return pilha.peek().existe(nome);
-    }
-
-    @Override
-    public String toString() {
-        return pilha.toString();
     }
 }
+

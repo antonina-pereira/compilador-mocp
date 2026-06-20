@@ -1,1 +1,14 @@
-int x;
+inteiro global = 100;
+
+vazio funcao_a() {
+    inteiro segredo = 5; /* Esta variável pertence APENAS à funcao_a */
+}
+
+vazio principal() {
+    global = segredo; /* ERRO 1: A 'principal' não conhece o 'segredo'! */
+}
+
+real funcao_a() {
+    /* ERRO 2: Já usámos o nome 'funcao_a' lá em cima! */
+    retornar 1.5;
+}

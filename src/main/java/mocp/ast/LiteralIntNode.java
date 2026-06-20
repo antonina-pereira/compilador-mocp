@@ -5,16 +5,20 @@ package mocp.ast;
  * Ex.: 42, 0, 100
  */
 public class LiteralIntNode extends ASTNode {
+    private final String valor;
 
-    public final int valor;
-    public Tipo tipo = Tipo.INTEIRO;
-
-    public LiteralIntNode(int valor) {
+    public LiteralIntNode(String valor) {
         this.valor = valor;
     }
 
+    public String getValor() {
+        return valor;
+    }
+
+
+
     @Override
     public void print(String indent) {
-        System.out.println(indent + "LiteralInt: " + valor);
+        System.out.println(indent + "Literal Inteiro: " + valor);
     }
 }

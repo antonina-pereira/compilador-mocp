@@ -1,4 +1,11 @@
-/* Exemplo de ciclo enquanto: */
-enquanto (x > 0} {
-x = x - 10;
+/* Exemplo com sucesso */
+inteiro x = 10;
+real pi = 3.14;
+
+vazio principal() {
+    se (x > 5) {
+        retornar x;
+    } senao {
+        retornar 0;
+    }
 }

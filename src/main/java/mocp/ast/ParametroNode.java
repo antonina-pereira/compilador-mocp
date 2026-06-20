@@ -5,21 +5,25 @@ package mocp.ast;
  * Ex.: "inteiro k", "real v[]"
  */
 public class ParametroNode extends ASTNode {
+    private final String tipo;
+    private final String id;
+    private final boolean esVetor;
 
-    public final String tipo;
-    public final String nome;   // pode ser null em protótipos
-    public final boolean vetor;
-
-    public ParametroNode(String tipo, String nome, boolean vetor) {
+    public ParametroNode(String tipo, String id, boolean esVetor) {
         this.tipo = tipo;
-        this.nome = nome;
-        this.vetor = vetor;
+        this.id = id;
+        this.esVetor = esVetor;
     }
+
+    // --- GETTERS ADICIONADOS PARA O SEMÂNTICO ---
+    public String getTipo() { return tipo; }
+    public String getId() { return id; }
+    public boolean isEsVetor() { return esVetor; }
+    // --------------------------------------------
 
     @Override
     public void print(String indent) {
-        String sufixo = vetor ? "[]" : "";
-        String id = nome != null ? " " + nome : "";
-        System.out.println(indent + "Parametro: " + tipo + sufixo + id);
+        System.out.println(indent + "Parametro -> " + tipo + (esVetor ? "[] " : " ") + id);
     }
 }
+

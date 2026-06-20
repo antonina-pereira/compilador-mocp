@@ -1,3 +1,7 @@
-inteiro s[] = lers();
-
-inteiro v[]={1,2,3};
+/*Casting Explícito (Conversão de Tipos)*/
+vazio principal() {
+    inteiro a = 5;
+    real b = 2.5;
+    real c = (real) a + b;
+    inteiro d = (inteiro) c;
+}

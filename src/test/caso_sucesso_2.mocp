@@ -1,4 +1,12 @@
-/* Exemplo de ciclo para: */
-para (i = 0; i < 10; i = i + 1) {
-x = x + i;
+/*ciclo enquanto (while loop) e condicoes aninhadas*/
+vazio principal() {
+    inteiro contador = 10;
+    
+    enquanto (contador > 0) {
+        se (contador == 5) {
+            contador = contador - 2;
+        } senao {
+            contador = contador - 1;
+        }
+    }
 }

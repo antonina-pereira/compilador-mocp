@@ -6,16 +6,15 @@ package mocp.ast;
  * O valor armazenado não inclui as aspas externas.
  */
 public class LiteralStringNode extends ASTNode {
+    private final String conteudo;
 
-    public final String valor;
-    public Tipo tipo = Tipo.STRING;
+    public LiteralStringNode(String conteudo) {
+        this.conteudo = conteudo;
 
-    public LiteralStringNode(String valor) {
-        this.valor = valor;
     }
 
     @Override
     public void print(String indent) {
-        System.out.println(indent + "LiteralString: \"" + valor + "\"");
+        System.out.println(indent + "Literal String: " + conteudo);
     }
 }

@@ -8,25 +8,52 @@ import java.util.List;
  * Ex.: "inteiro fact(inteiro k) { ... }"
  */
 public class FuncaoNode extends ASTNode {
-
-    public final String tipo;
-    public final String nome;
-    public final List<ParametroNode> parametros = new ArrayList<>();
-    public AfirmacaoCompostaNode corpo;
+    private final String tipo;
+    private final String nome;
+    private ASTNode bloco;
+    private ASTNode parametros = null;
 
     public FuncaoNode(String tipo, String nome) {
         this.tipo = tipo;
         this.nome = nome;
     }
 
-    public void adicionarParametro(ParametroNode p) {
-        if (p != null) parametros.add(p);
+    public void setBloco(ASTNode bloco) {
+        this.bloco = bloco;
     }
+
+    public void setParametros(ASTNode parametros) {
+        this.parametros = parametros;
+    }
+
+    // --- GETTERS ADICIONADOS PARA O SEMÂNTICO ---
+    public String getTipo() {
+        return tipo;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public ASTNode getBloco() {
+        return bloco;
+    }
+
+    public ASTNode getParametros() {
+        return parametros;
+    }
+    // --------------------------------------------
 
     @Override
     public void print(String indent) {
-        System.out.println(indent + "Funcao: " + tipo + " " + nome);
-        for (ParametroNode p : parametros) p.print(indent + "  ");
-        if (corpo != null) corpo.print(indent + "  ");
+        System.out.println(indent + "Funcao: " + nome + " (Retorno: " + tipo + ")");
+        if (parametros != null) {
+            System.out.println(indent + "  Parametros:");
+            parametros.print(indent + "    ");
+        }
+        if (bloco != null) {
+            bloco.print(indent + "  ");
+        }
     }
 }
+
