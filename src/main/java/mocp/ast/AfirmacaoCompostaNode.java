@@ -31,4 +31,3 @@ public class AfirmacaoCompostaNode extends ASTNode {
         System.out.println(indent + "}");
     }
 }
-

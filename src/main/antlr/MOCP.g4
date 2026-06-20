@@ -10,29 +10,19 @@ grammar MOCP;
 // 			 A regra de que prototipos vêm primeiro é aplicada no Analisador Semântico, (antes o código tinha conflito de Lookahead (LL)*)
 // 			 Como prototipo, dec_variavel e funcao comecam da mesma maneirda (tipo ID...) o ANTLR fica baralhado na transicao do primeiro bloco * para o segundo bloco *
 // 			 Não sabia quando é que os protótipos acabam e as funções começam.
-programa : (prototipo PONTO_VIRG | dec_variavel PONTO_VIRG | funcao)* EOF ;
-
-// Detecta palavras-chave da linguagem C e emite um erro
-// Palavras-chave da linguagem C estão definidas no LEXER
-invalidCKeyword
-  : C_KEYWORD
-    {
-      notifyErrorListeners("Palavra-chave C não permitida: " + $C_KEYWORD.text);
-    }
-  ;
+// TODO: unresolved bug that fails success case nº 8 in the tests folder
+programa :  (prototipo
+          | funcao
+          | dec_variavel PONTO_VIRG
+          )* 
+            EOF
+          ;
 
 // Define os tipos de dados básicos
 tipo : T_INTEIRO | T_REAL | T_VAZIO ;
 
-// Declaração de variáveis
-dec_variavel : tipo dec_item (VIRGULA dec_item)* ;
-
-dec_item : ID (ABRE_RET INT_VAL? FECHA_RET)? (ATRIB inicializador)? ;
-
-inicializador : expressao | ABRE_CHAV expressao (VIRGULA expressao)* FECHA_CHAV ;
-
 // Correção do Vazio nos Protótipos
-prototipo : tipo (ID | PRINCIPAL) ABRE_PAR prototipo_params? FECHA_PAR ;
+prototipo : tipo (ID | PRINCIPAL) ABRE_PAR prototipo_params? FECHA_PAR PONTO_VIRG ;
 
 prototipo_params : param_tipo (VIRGULA param_tipo)* | T_VAZIO ;
 
@@ -44,6 +34,23 @@ funcao : tipo (ID | PRINCIPAL) ABRE_PAR parametros? FECHA_PAR bloco ;
 parametros : param_dec (VIRGULA param_dec)* | T_VAZIO ;
 
 param_dec : tipo ID (ABRE_RET FECHA_RET)? ;
+
+// Declaração de variáveis
+dec_variavel
+    : tipo ID
+      { _input.LA(1) != ABRE_PAR }?
+      (ABRE_RET INT_VAL? FECHA_RET)?
+      (ATRIB inicializador)?
+      (VIRGULA dec_item)*
+    ;
+
+dec_item
+    : ID
+      (ABRE_RET INT_VAL? FECHA_RET)?
+      (ATRIB inicializador)?
+    ;
+
+inicializador : expressao | ABRE_CHAV expressao (VIRGULA expressao)* FECHA_CHAV ;
 
 bloco : ABRE_CHAV instrucao* FECHA_CHAV ;
 
@@ -92,6 +99,14 @@ expressao
 
 lista_args : expressao (VIRGULA expressao)* ;
 
+// Detecta palavras-chave da linguagem C e emite um erro
+// Palavras-chave da linguagem C estão definidas no LEXER
+invalidCKeyword
+  : C_KEYWORD
+    {
+      notifyErrorListeners("Palavra-chave C não permitida: " + $C_KEYWORD.text);
+    }
+  ;
 // ======================
 // LEXER (analise lexica)
 // ======================

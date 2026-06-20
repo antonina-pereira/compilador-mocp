@@ -1,0 +1,5 @@
+inteiro soma(inteiro a, inteiro b);
+
+inteiro principal() {
+    soma(1, 2);
+}

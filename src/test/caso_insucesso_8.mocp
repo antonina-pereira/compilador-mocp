@@ -1,0 +1,6 @@
+/* Número de argumentos errados (a menos) */
+inteiro soma(inteiro a, inteiro b);
+
+inteiro principal() {
+    soma(1);
+}

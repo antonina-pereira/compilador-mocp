@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 import mocp.ast.ASTNode;
 import mocp.semantic.SemanticAnalyzer;
+import mocp.semantic.SymbolTable;
 import java.util.List;
 
 public class Main {

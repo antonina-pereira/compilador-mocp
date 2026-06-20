@@ -1,4 +1,7 @@
 package mocp.ast;
+import mocp.semantic.SymbolTable;
+import mocp.semantic.SymbolInfo;
+import mocp.semantic.Categoria;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,4 +41,3 @@ public class ChamadaFuncaoNode extends ASTNode {
         }
     }
 }
-

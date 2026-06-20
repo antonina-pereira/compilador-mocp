@@ -79,6 +79,9 @@ public class SemanticAnalyzer {
         else if (no instanceof IDNode) {
             validarUsoVariavel((IDNode) no);
         }
+        else if (no instanceof ChamadaFuncaoNode) {
+          validarChamadaFuncao((ChamadaFuncaoNode) no);
+        }
     }
 
     private void validarPrototipo(PrototipoNode proto) {
@@ -169,6 +172,37 @@ public class SemanticAnalyzer {
         if (info == null) {
             reportarErro("A variável '" + nome + "' não foi declarada antes de ser utilizada!");
         }
+    }
+
+    private void validarChamadaFuncao(ChamadaFuncaoNode chamada) {
+      String nome = chamada.getNome();
+      SymbolInfo simbolo = tabelaSimbolos.procurar(nome);
+
+      // Existe?
+      if (simbolo == null) {
+        reportarErro("Função não declarada: " + nome);
+        return;
+      }
+
+      // É função?
+      if (simbolo.getCategoria() != Categoria.FUNCAO &&
+        simbolo.getCategoria() != Categoria.PROTOTIPO) {
+        reportarErro("'" + nome + "' não é uma função");
+        return;
+      }
+
+      // Número de argumentos
+      int esperados = simbolo.getTiposParametros().size();
+      int recebidos = chamada.getArgumentos().size();
+      if (esperados != recebidos) {
+        reportarErro("Função '" + nome + "' espera " + esperados +
+                     " argumentos, mas recebeu " + recebidos);
+      }
+
+      // Validar argumentos (descida na árvore!)
+      for (ASTNode arg : chamada.getArgumentos()) {
+        validarNo(arg);
+      }
     }
 
     private void reportarErro(String mensagem) {
