@@ -1,4 +1,5 @@
-/* Exemplo com sucesso */
+/* Exemplo com insucesso */
+/* Retorna x ou 0 apesar da funcção 'principal' retornar vazio */
 inteiro x = 10;
 real pi = 3.14;
 

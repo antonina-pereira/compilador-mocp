@@ -16,7 +16,6 @@ public class OpUnNode extends ASTNode {
 
     public ASTNode getExpressao() {
         return expressao;
->>>>>>> origin/jose_barroso
     }
 
     @Override

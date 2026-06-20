@@ -33,13 +33,8 @@ endif
 all: antlr compile
 
 antlr:
-<<<<<<< HEAD
-	mkdir -p $(GEN_DIR)
-	java -jar $(ANTLR_JAR) -Dlanguage=Java -visitor -package $(PACKAGE) -o $(GEN_DIR) $(GRAMMAR)
-=======
 	mkdir -p $(GEN_DIR)/$(PACKAGE)
 	java -jar $(ANTLR_JAR) -Dlanguage=Java -visitor -package $(PACKAGE) -o $(GEN_DIR)/$(PACKAGE) $(GRAMMAR)
->>>>>>> origin/jose_barroso
 
 compile:
 	mkdir -p $(BUILD_DIR)

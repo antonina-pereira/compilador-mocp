@@ -19,7 +19,6 @@ public class ProgramaNode extends ASTNode {
 
     public List<ASTNode> getFilhos() {
         return filhos;
->>>>>>> origin/jose_barroso
     }
 
     @Override

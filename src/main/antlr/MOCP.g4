@@ -12,6 +12,15 @@ grammar MOCP;
 // 			 Não sabia quando é que os protótipos acabam e as funções começam.
 programa : (prototipo PONTO_VIRG | dec_variavel PONTO_VIRG | funcao)* EOF ;
 
+// Detecta palavras-chave da linguagem C e emite um erro
+// Palavras-chave da linguagem C estão definidas no LEXER
+invalidCKeyword
+  : C_KEYWORD
+    {
+      notifyErrorListeners("Palavra-chave C não permitida: " + $C_KEYWORD.text);
+    }
+  ;
+
 // Define os tipos de dados básicos
 tipo : T_INTEIRO | T_REAL | T_VAZIO ;
 
@@ -25,14 +34,7 @@ inicializador : expressao | ABRE_CHAV expressao (VIRGULA expressao)* FECHA_CHAV 
 // Correção do Vazio nos Protótipos
 prototipo : tipo (ID | PRINCIPAL) ABRE_PAR prototipo_params? FECHA_PAR ;
 
-<<<<<<< HEAD
-inicializador
-  : expressao
-  | ECHAVE (expressao (VIRGULA expressao)*)? DCHAVE
-  ;
-=======
 prototipo_params : param_tipo (VIRGULA param_tipo)* | T_VAZIO ;
->>>>>>> origin/jose_barroso
 
 // param_tipo já não aceita T_VAZIO individualmente
 param_tipo : tipo (ABRE_RET FECHA_RET)? ;
@@ -52,6 +54,7 @@ instrucao
     | instrucao_enquanto
     | instrucao_para
     | RETORNAR expressao? PONTO_VIRG
+    | invalidCKeyword
     ;
 
 instrucao_se : SE ABRE_PAR expressao FECHA_PAR bloco (SENAO bloco)? ;
@@ -114,7 +117,7 @@ ESCREVERS : 'escrevers' ;
 
 // Keywords de C capturadas como erro léxico
 // (Como não estão no parser, se o programador as usar, o parser rejeita)
-ERR_C_KEYWORD : 'int' | 'if' | 'else' | 'while' | 'return' | 'void' | 'float' | 'char' ;
+C_KEYWORD : 'int' | 'if' | 'else' | 'while' | 'return' | 'void' | 'float' | 'char' ;
 
 ATRIB       : '=' ;
 MAIS        : '+' ;
@@ -151,21 +154,6 @@ fragment ESCAPE : '\\' [btnfr"'\\] ;
 STRING_VAL : '"' ( ESCAPE | ~['"\\\r\n] )* '"' ;
 CHAR_VAL   : '\'' ( ESCAPE | ~['\\\r\n] ) '\'' ;
 
-<<<<<<< HEAD
-// Estruturas de controlo
-SE : 'se' ;
-SENAO : 'senao' ;
-ENQUANTO : 'enquanto' ;
-PARA : 'para' ;
-RETORNAR : 'retornar' ;
-
-ID : [a-zA-Z_] [a-zA-Z0-9_]* ; // Identificadores
-
-ERRO_CHAR
-  : .
-  ;
-=======
 WS : [ \t\r\n]+ -> skip ;
 COMMENT : '/*' .*? '*/' -> skip ;
 LINE_COMMENT : '//' ~[\r\n]* -> skip ;
->>>>>>> origin/jose_barroso
