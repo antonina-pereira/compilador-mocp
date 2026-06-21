@@ -2,10 +2,15 @@ package mocp;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
+
 import mocp.ast.ASTNode;
 import mocp.semantic.SemanticAnalyzer;
 import mocp.semantic.SymbolTable;
+import mocp.codegen.CodeGenerator;
+
 import java.util.List;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class Main {
 
@@ -76,5 +81,17 @@ public class Main {
       System.out.println(i.toString());
     }
     System.out.println("---------------------------------------------------");
+
+    // --- GERAÇÃO DE CÓDIGO ---
+    CodeGenerator gen = new CodeGenerator();
+    String code = gen.gerar(ast);
+
+    // Guardar código gerado num ficheiro
+    try (FileWriter writer = new FileWriter("output/Programa.java")) {
+      writer.write(code);
+      System.out.println("Ficheiro gerado com sucesso!");
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 }
