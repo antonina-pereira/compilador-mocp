@@ -15,63 +15,61 @@ public class CodeGenerator {
 
     public String gerar(ASTNode ast) {
         System.out.println("DEBUG: CodeGenerator.gerar() foi chamado!");
-        sb = new StringBuilder();
 
-        if(usaStrings) sb.append("import java.util.Scanner;\n\n");
-        sb.append("class Main {\n");
-        indent++;
+        // Reset da flag para o caso de compilarmos vários ficheiros seguidos
+        this.usaStrings = false;
 
-        tab();
-        if(usaStrings) sb.append("private static Scanner scanner = new Scanner(System.in);\n\n");
-
-        if(usaStrings){
-            // --- FUNÇÕES AUXILIARES INJETADAS ---
-            tab();
-            sb.append("public static int[] lerStringParaVetor(String s) {\n");
-            indent++;
-            tab(); sb.append("int[] v = new int[s.length() + 1];\n");
-            tab(); sb.append("for (int i = 0; i < s.length(); i++) {\n");
-            indent++;
-            tab(); sb.append("v[i] = (int) s.charAt(i);\n");
-            indent--;
-            tab(); sb.append("}\n");
-            tab(); sb.append("v[s.length()] = 0;\n");
-            tab(); sb.append("return v;\n");
-            indent--;
-            tab(); sb.append("}\n\n");
-
-            tab();
-            sb.append("public static void imprimirStringVetor(int[] v) {\n");
-            indent++;
-            tab(); sb.append("for (int i = 0; i < v.length && v[i] != 0; i++) {\n");
-            indent++;
-            tab(); sb.append("System.out.print((char) v[i]);\n");
-            indent--;
-            tab(); sb.append("}\n");
-            indent--;
-            tab(); sb.append("}\n\n");
-            // ------------------------------------
-        }
-
+        // Passo 1: Construir o corpo do programa PRIMEIRO
+        this.sb = new StringBuilder();
+        this.indent = 1; // O corpo fica dentro da class Main
 
         if (ast instanceof ProgramaNode) {
-            // 1. Declarações globais (variáveis)
+            // 1. Declarações globais
             for (ASTNode child : ((ProgramaNode) ast).getFilhos()) {
-                if (child instanceof DeclaracaoNode) {
-                    gerarDeclaracaoGlobal((DeclaracaoNode) child);
-                }
+                if (child instanceof DeclaracaoNode) gerarDeclaracaoGlobal((DeclaracaoNode) child);
             }
             // 2. Funções
             for (ASTNode child : ((ProgramaNode) ast).getFilhos()) {
-                if (child instanceof FuncaoNode) {
-                    gerarFuncao((FuncaoNode) child);
-                }
+                if (child instanceof FuncaoNode) gerarFuncao((FuncaoNode) child);
             }
         }
 
-        indent--;
-        sb.append("}\n");
-        return sb.toString();
+        // Guardamos o corpo gerado (neste ponto, a flag usaStrings já sabe se deve ser true ou false!)
+        String corpoDoPrograma = sb.toString();
+
+        // Passo 2: Montar o Ficheiro Final
+        StringBuilder ficheiroFinal = new StringBuilder();
+
+        if (usaStrings) ficheiroFinal.append("import java.util.Scanner;\n\n");
+        ficheiroFinal.append("class Main {\n");
+
+        if (usaStrings) {
+            ficheiroFinal.append("  private static Scanner scanner = new Scanner(System.in);\n\n");
+
+            // --- FUNÇÕES AUXILIARES INJETADAS ---
+            ficheiroFinal.append("  public static int[] lerStringParaVetor(String s) {\n");
+            ficheiroFinal.append("    int[] v = new int[s.length() + 1];\n");
+            ficheiroFinal.append("    for (int i = 0; i < s.length(); i++) {\n");
+            ficheiroFinal.append("      v[i] = (int) s.charAt(i);\n");
+            ficheiroFinal.append("    }\n");
+            ficheiroFinal.append("    v[s.length()] = 0;\n");
+            ficheiroFinal.append("    return v;\n");
+            ficheiroFinal.append("  }\n\n");
+
+            ficheiroFinal.append("  public static void imprimirStringVetor(int[] v) {\n");
+            ficheiroFinal.append("    for (int i = 0; i < v.length && v[i] != 0; i++) {\n");
+            ficheiroFinal.append("      System.out.print((char) v[i]);\n");
+            ficheiroFinal.append("    }\n");
+            ficheiroFinal.append("  }\n\n");
+            // ------------------------------------
+        }
+
+        // Colamos o corpo do programa logo a seguir às funções auxiliares
+        ficheiroFinal.append(corpoDoPrograma);
+
+        ficheiroFinal.append("}\n");
+
+        return ficheiroFinal.toString();
     }
 
     // ---------- GLOBAIS ----------
