@@ -10,3 +10,4 @@ vazio principal() {
 
     resultado = y + 10; /* Dead Code Elimination deve REMOVER isto por estar depois do retornar! */
 }
+

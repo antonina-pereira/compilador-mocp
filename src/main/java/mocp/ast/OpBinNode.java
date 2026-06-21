@@ -1,5 +1,12 @@
 package mocp.ast;
 
+/**
+ * Nó que representa uma operação binária.
+ * Cobre operações aritméticas (+, -, *, /, %), lógicas (&&, ||),
+ * relacionais (==, !=, <, >, <=, >=) e atribuição (=).
+ * O tipo de resultado é anotado pelo analisador semântico.
+ */
+
 public class OpBinNode extends ASTNode {
     private final String operador;
     private final ASTNode esquerda;
@@ -32,3 +39,4 @@ public class OpBinNode extends ASTNode {
         if (direita != null) direita.print(indent + "  ");
     }
 }
+

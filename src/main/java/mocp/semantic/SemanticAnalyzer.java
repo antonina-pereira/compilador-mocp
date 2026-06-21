@@ -103,6 +103,9 @@ public class SemanticAnalyzer {
         else if (no instanceof IDNode) {
             validarUsoVariavel((IDNode) no);
         }
+        else if (no instanceof ChamadaFuncaoNode) {
+          validarChamadaFuncao((ChamadaFuncaoNode) no);
+        }
     }
 
     private void validarPrototipo(PrototipoNode proto) {
@@ -323,3 +326,4 @@ public class SemanticAnalyzer {
         return numErros > 0;
     }
 }
+

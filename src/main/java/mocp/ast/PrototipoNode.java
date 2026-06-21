@@ -3,6 +3,10 @@ package mocp.ast;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Nó que representa a declaração de protótipo de uma função.
+ * Ex.: "inteiro fact(inteiro);"
+ */
 public class PrototipoNode extends ASTNode {
     private final String tipo;
     private final String nome;
@@ -27,3 +31,4 @@ public class PrototipoNode extends ASTNode {
         System.out.println(indent + "Prototipo Funcao: " + nome + " (Retorno: " + tipo + ", Params: " + tiposParametros + ")");
     }
 }
+

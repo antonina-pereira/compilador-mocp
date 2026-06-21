@@ -1,5 +1,11 @@
 package mocp.ast;
 
+/**
+ * Nó que representa o acesso a um elemento de vetor.
+ * Ex.: "v[i]", "v[i+1]"
+ * O tipo de resultado é o tipo do elemento (INTEIRO ou REAL),
+ * anotado pelo analisador semântico.
+ */
 public class AcessoVetorNode extends ASTNode {
     private final String id;
     private final ASTNode indice;
@@ -27,3 +33,4 @@ public class AcessoVetorNode extends ASTNode {
         }
     }
 }
+

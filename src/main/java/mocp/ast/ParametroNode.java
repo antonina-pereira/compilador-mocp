@@ -1,5 +1,9 @@
 package mocp.ast;
 
+/**
+ * Nó que representa um parâmetro formal de uma função.
+ * Ex.: "inteiro k", "real v[]"
+ */
 public class ParametroNode extends ASTNode {
     private final String tipo;
     private final String id;
@@ -22,3 +26,4 @@ public class ParametroNode extends ASTNode {
         System.out.println(indent + "Parametro -> " + tipo + (esVetor ? "[] " : " ") + id);
     }
 }
+

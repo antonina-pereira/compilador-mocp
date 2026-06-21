@@ -1,5 +1,9 @@
 package mocp.ast;
 
+/**
+ * Nó que representa uma referência a um identificador (variável).
+ * O tipo é anotado pelo analisador semântico.
+ */
 public class IDNode extends ASTNode {
     private final String nome;
 
@@ -16,3 +20,4 @@ public class IDNode extends ASTNode {
         System.out.println(indent + "Identificador: " + nome);
     }
 }
+

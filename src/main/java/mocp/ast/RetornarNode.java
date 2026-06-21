@@ -1,5 +1,9 @@
 package mocp.ast;
 
+/**
+ * Nó que representa uma afirmação retornar.
+ * Ex.: "retornar x * 2;" ou "retornar;" (para funções vazio)
+ */
 public class RetornarNode extends ASTNode {
     private ASTNode expressao = null;
 
@@ -22,3 +26,4 @@ public class RetornarNode extends ASTNode {
         }
     }
 }
+

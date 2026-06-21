@@ -1,5 +1,9 @@
 package mocp.ast;
 
+/**
+ * Nó que representa um literal inteiro.
+ * Ex.: 42, 0, 100
+ */
 public class LiteralIntNode extends ASTNode {
     private final String valor;
 

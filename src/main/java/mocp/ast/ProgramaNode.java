@@ -3,6 +3,10 @@ package mocp.ast;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Nó raiz da AST. Contém todas as declarações, protótipos e
+ * definições de funções presentes no programa.
+ */
 public class ProgramaNode extends ASTNode {
     private final List<ASTNode> filhos = new ArrayList<>();
 

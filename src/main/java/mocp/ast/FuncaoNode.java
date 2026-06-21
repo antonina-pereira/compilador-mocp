@@ -1,5 +1,12 @@
 package mocp.ast;
 
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Nó que representa a definição completa de uma função.
+ * Ex.: "inteiro fact(inteiro k) { ... }"
+ */
 public class FuncaoNode extends ASTNode {
     private final String tipo;
     private final String nome;

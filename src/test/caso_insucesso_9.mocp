@@ -1,0 +1,6 @@
+/* Variável usada como função */
+inteiro x;
+
+inteiro principal() {
+    x(1, 2);
+}

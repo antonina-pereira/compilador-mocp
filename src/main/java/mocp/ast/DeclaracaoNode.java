@@ -3,6 +3,10 @@ package mocp.ast;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Nó que representa uma declaração de variáveis.
+ * Ex.: "inteiro i, j = 0;" ou "real v[100];"
+ */
 public class DeclaracaoNode extends ASTNode {
     private final String tipo;
     private final List<ASTNode> itens = new ArrayList<>();
@@ -37,3 +41,4 @@ public class DeclaracaoNode extends ASTNode {
         }
     }
 }
+

@@ -1,5 +1,10 @@
 package mocp.ast;
 
+/**
+ * Nó que representa um ciclo para.
+ * Ex.: "para (i = 0; i < n; i = i + 1) { ... }"
+ * Qualquer das três partes pode ser null (omitida).
+ */
 public class ParaNode extends ASTNode {
     private ASTNode inicializacao;
     private ASTNode condicao;
@@ -18,6 +23,13 @@ public class ParaNode extends ASTNode {
     public ASTNode getIncremento() { return incremento; }
     public ASTNode getCorpo() { return bloco; }
 
+    public ParaNode(ASTNode init, ASTNode cond, ASTNode inc, ASTNode bloco) {
+        this.inicializacao = init;
+        this.condicao = cond;
+        this.incremento = inc;
+        this.bloco = bloco;
+    }
+
     @Override
     public void print(String indent) {
         System.out.println(indent + "Loop PARA");
@@ -27,3 +39,4 @@ public class ParaNode extends ASTNode {
         if (bloco != null) bloco.print(indent + "  Bloco:");
     }
 }
+

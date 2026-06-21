@@ -3,6 +3,10 @@ package mocp.ast;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Nó que representa um bloco de afirmações delimitado por chavetas.
+ * Pode conter declarações e afirmações intercaladas.
+ */
 public class AfirmacaoCompostaNode extends ASTNode {
     private final List<ASTNode> instrucoes = new ArrayList<>();
 

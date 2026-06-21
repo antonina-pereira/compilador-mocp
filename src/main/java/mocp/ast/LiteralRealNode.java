@@ -1,5 +1,9 @@
 package mocp.ast;
 
+/**
+ * Nó que representa um literal real (número decimal).
+ * Ex.: 3.14, 0.5
+ */
 public class LiteralRealNode extends ASTNode {
     private final String valor;
 

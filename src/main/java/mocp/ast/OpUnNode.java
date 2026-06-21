@@ -1,5 +1,10 @@
 package mocp.ast;
 
+/**
+ * Nó que representa uma operação unária.
+ * Cobre negação lógica (!), negação aritmética (-) e cast ((tipo) expr).
+ * O tipo de resultado é anotado pelo analisador semântico.
+ */
 public class OpUnNode extends ASTNode {
     private final String operador;
     private final ASTNode expressao;
@@ -23,3 +28,4 @@ public class OpUnNode extends ASTNode {
         if (expressao != null) expressao.print(indent + "  ");
     }
 }
+

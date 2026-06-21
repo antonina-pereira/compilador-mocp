@@ -1,5 +1,9 @@
 package mocp.ast;
 
+/**
+ * Nó que representa uma afirmação condicional se/senao.
+ * O ramo "senao" é opcional (pode ser null).
+ */
 public class SeNode extends ASTNode {
     private ASTNode condicao;
     private ASTNode blocoSe;
@@ -23,3 +27,4 @@ public class SeNode extends ASTNode {
         if (blocoSenao != null) blocoSenao.print(indent + "  Senao:");
     }
 }
+

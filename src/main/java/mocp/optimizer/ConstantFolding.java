@@ -2,6 +2,14 @@ package mocp.optimizer;
 
 import java.util.ArrayList;
 import java.util.List;
+
+/**
+ * Otimização de dobramento de constantes.
+ *
+ * Substitui operações binárias cujos dois operandos são constantes numéricas
+ * pelo resultado calculado em tempo de compilação.
+ * Ex.: "t1 = 2 + 3"  →  "t1 = 5"
+ */
 import mocp.tac.*;
 
 public class ConstantFolding {
@@ -11,6 +19,7 @@ public class ConstantFolding {
         for (Instruction instr : instrucoes) {
             if (instr instanceof OpBinInstr) {
                 OpBinInstr op = (OpBinInstr) instr;
+
                 // ALTERADO: Usar 'esq' e 'dir' que são os atributos reais da tua classe!
                 if (isNumerico(op.esq) && isNumerico(op.dir)) {
                     String val = calcular(op.esq, op.op, op.dir);
@@ -79,3 +88,4 @@ public class ConstantFolding {
         return String.valueOf(d);
     }
 }
+

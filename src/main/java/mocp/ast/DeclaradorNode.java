@@ -1,5 +1,9 @@
 package mocp.ast;
 
+/**
+ * Nó que representa um único declarador dentro de uma declaração.
+ * Ex.: "n", "v[100]", "x = 5", "v[] = {1,2,3}"
+ */
 public class DeclaradorNode extends ASTNode {
     private final String id;
     private ASTNode inicializador = null;
@@ -39,3 +43,4 @@ public class DeclaradorNode extends ASTNode {
         }
     }
 }
+

@@ -2,8 +2,12 @@ package mocp;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
+
 import mocp.ast.ASTNode;
 import mocp.semantic.SemanticAnalyzer;
+import mocp.semantic.SymbolTable;
+import mocp.codegen.CodeGenerator;
+
 import java.util.List;
 import mocp.codegen.CodeGenerator;
 import java.io.FileWriter;
@@ -43,7 +47,7 @@ public class Main {
 
     // Verificar se foram encontrados erros de sintaxe
     if(errorListener.temErros()) {
-      System.err.println(errorListener.getNumErros() + " erro(s) encontrado(s). Árvore não gerada.");
+      System.err.println(errorListener.getNumErros() + " erro(s) encontrado(s). Compilação interrompida.");
       System.exit(1);
     }
 
