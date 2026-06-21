@@ -22,6 +22,33 @@ public class CodeGenerator {
         tab();
         sb.append("private static Scanner scanner = new Scanner(System.in);\n\n");
 
+        // --- FUNÇÕES AUXILIARES INJETADAS ---
+        tab();
+        sb.append("public static int[] lerStringParaVetor(String s) {\n");
+        indent++;
+        tab(); sb.append("int[] v = new int[s.length() + 1];\n");
+        tab(); sb.append("for (int i = 0; i < s.length(); i++) {\n");
+        indent++;
+        tab(); sb.append("v[i] = (int) s.charAt(i);\n");
+        indent--;
+        tab(); sb.append("}\n");
+        tab(); sb.append("v[s.length()] = 0;\n");
+        tab(); sb.append("return v;\n");
+        indent--;
+        tab(); sb.append("}\n\n");
+
+        tab();
+        sb.append("public static void imprimirStringVetor(int[] v) {\n");
+        indent++;
+        tab(); sb.append("for (int i = 0; i < v.length && v[i] != 0; i++) {\n");
+        indent++;
+        tab(); sb.append("System.out.print((char) v[i]);\n");
+        indent--;
+        tab(); sb.append("}\n");
+        indent--;
+        tab(); sb.append("}\n\n");
+        // ------------------------------------
+
         if (ast instanceof ProgramaNode) {
             // 1. Declarações globais (variáveis)
             for (ASTNode child : ((ProgramaNode) ast).getFilhos()) {
@@ -302,7 +329,7 @@ public class CodeGenerator {
         sb.append(")");
     }
 
-    // ---------- OP UNÁRIO (inclui casts) ----------
+    // ---------- OP UNÁRIO (inclui casts e booleanos) ----------
     private void gerarOpUn(OpUnNode un) {
         String op = un.getOperador();
         ASTNode expr = un.getExpressao();
@@ -319,8 +346,9 @@ public class CodeGenerator {
             sb.append("-");
             gerarExpressao(expr);
         } else if (op.equals("!")) {
-            sb.append("!");
+            sb.append("(");
             gerarExpressao(expr);
+            sb.append(" == 0)");
         } else {
             gerarExpressao(expr);
         }

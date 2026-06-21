@@ -123,7 +123,9 @@ public class SemanticAnalyzer {
             if (item instanceof DeclaradorNode) {
                 DeclaradorNode declarador = (DeclaradorNode) item;
                 String nome = declarador.getId();
-                SymbolInfo novaVar = new SymbolInfo(nome, tipo, Categoria.VARIAVEL);
+                // CORREÇÃO VETORES: guarda se é vetor
+                boolean isVetor = declarador.getTamanhoVetor() >= 0;
+                SymbolInfo novaVar = new SymbolInfo(nome, tipo, Categoria.VARIAVEL, isVetor);
 
                 if (!tabelaSimbolos.inserir(novaVar)) {
                     reportarErro("A variável '" + nome + "' já foi declarada neste escopo!");
@@ -169,8 +171,8 @@ public class SemanticAnalyzer {
                 for (ASTNode paramNo : ((AfirmacaoCompostaNode) params).getInstrucoes()) {
                     if (paramNo instanceof ParametroNode) {
                         ParametroNode pNode = (ParametroNode) paramNo;
-                        Categoria cat = pNode.isEsVetor() ? Categoria.VETOR : Categoria.VARIAVEL;
-                        SymbolInfo infoParam = new SymbolInfo(pNode.getId(), pNode.getTipo(), cat);
+                        // CORREÇÃO VETORES: guarda a flag isVetor no SymbolInfo
+                        SymbolInfo infoParam = new SymbolInfo(pNode.getId(), pNode.getTipo(), Categoria.VARIAVEL, pNode.isEsVetor());
 
                         if (!tabelaSimbolos.inserir(infoParam)) {
                             reportarErro("O parâmetro '" + pNode.getId() + "' já foi declarado na assinatura desta função!");
@@ -266,7 +268,17 @@ public class SemanticAnalyzer {
 
         if (no instanceof IDNode) {
             SymbolInfo inf = tabelaSimbolos.procurar(((IDNode) no).getNome());
-            return inf != null ? inf.getTipo() : "erro";
+            if (inf == null) return "erro";
+            // CORREÇÃO VETORES: devolve com [] se for vetor
+            if (inf.isVetor()) return inf.getTipo() + "[]";
+            return inf.getTipo();
+        }
+        if (no instanceof AcessoVetorNode) {
+            AcessoVetorNode acesso = (AcessoVetorNode) no;
+            SymbolInfo inf = tabelaSimbolos.procurar(acesso.getId());
+            if (inf == null) return "erro";
+            // Acesso a um elemento do vetor devolve o tipo base (sem [])
+            return inf.getTipo();
         }
         if (no instanceof OpBinNode) {
             String tEsq = deduzirTipo(((OpBinNode) no).getEsquerda());
@@ -276,8 +288,10 @@ public class SemanticAnalyzer {
         }
         if (no instanceof ChamadaFuncaoNode) {
             String nomeFunc = ((ChamadaFuncaoNode) no).getNome();
-            if (nomeFunc.equals("ler") || nomeFunc.equals("lerc") || nomeFunc.equals("lers")) return "inteiro";
-            if (nomeFunc.equals("escrever") || nomeFunc.equals("escreverc") || nomeFunc.equals("escrevers") || nomeFunc.equals("escreverv")) return "vazio";
+            if (nomeFunc.equals("ler") || nomeFunc.equals("lerc")) return "inteiro";
+            if (nomeFunc.equals("lers")) return "inteiro[]";   // <--- CORREÇÃO
+            if (nomeFunc.equals("escrever") || nomeFunc.equals("escreverc") ||
+                    nomeFunc.equals("escrevers") || nomeFunc.equals("escreverv")) return "vazio";
             SymbolInfo inf = tabelaSimbolos.procurar(nomeFunc);
             return inf != null ? inf.getTipo() : "vazio";
         }
@@ -285,9 +299,18 @@ public class SemanticAnalyzer {
     }
     // CORREÇÃO: Inteiros aceitam caracteres (ASCII) e strings
     private boolean tiposCompativeis(String esperado, String recebido) {
-        if (esperado.equals(recebido)) return true;
-        if (esperado.equals("real") && recebido.equals("inteiro")) return true; // Promoção implícita
-        if (esperado.equals("inteiro") && (recebido.equals("char") || recebido.equals("string"))) return true; // MOCP: inteiros guardam ASCII
+        // CORREÇÃO VETORES: suporte a [] na comparação
+        boolean espVetor = esperado.endsWith("[]");
+        boolean recVetor = recebido.endsWith("[]");
+        if (espVetor != recVetor) return false;
+
+        // Remover [] para comparar base
+        String baseEsp = espVetor ? esperado.substring(0, esperado.length()-2) : esperado;
+        String baseRec = recVetor ? recebido.substring(0, recebido.length()-2) : recebido;
+
+        if (baseEsp.equals(baseRec)) return true;
+        if (baseEsp.equals("real") && baseRec.equals("inteiro")) return true; // Promoção implícita
+        if (baseEsp.equals("inteiro") && (baseRec.equals("char") || baseRec.equals("string"))) return true; // MOCP: inteiros guardam ASCII
         return false;
     }
 

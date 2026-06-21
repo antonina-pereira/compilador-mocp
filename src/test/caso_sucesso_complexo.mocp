@@ -12,7 +12,7 @@ inteiro taxa_base = 23;
 real limite = 100.0;
 
 vazio cabecalho(vazio) {
-    escrevers("--- Sistema de Calculo ---");
+    escrevers("--- Sistema de Calculo ---\n");
 }
 
 real calcula_desconto(inteiro valor) {
@@ -28,7 +28,7 @@ vazio principal(vazio) {
     inteiro modo = 'A';
     escreverc(modo);
 
-    escrevers("Introduza um valor: ");
+    escrevers("\nIntroduza um valor: ");
     inteiro entrada = ler(); // Função I/O mapeada no SemanticAnalyzer
     real resultado_final;
 

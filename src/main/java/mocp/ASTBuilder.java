@@ -27,18 +27,13 @@ public class ASTBuilder extends MOCPBaseVisitor<ASTNode> {
     @Override
     public ASTNode visitDec_item(MOCPParser.Dec_itemContext ctx) {
         DeclaradorNode declarador = new DeclaradorNode(ctx.ID().getText());
-
-        // Verifica se há definição de tamanho de vetor
         if (ctx.ABRE_RET() != null) {
             if (ctx.INT_VAL() != null) {
-                int tamanho = Integer.parseInt(ctx.INT_VAL().getText());
-                declarador.setTamanhoVetor(tamanho);
+                declarador.setTamanhoVetor(Integer.parseInt(ctx.INT_VAL().getText()));
             } else {
-                // Caso seja apenas "[]" sem tamanho explícito, usamos 0 para indicar vetor sem tamanho fixo
-                declarador.setTamanhoVetor(0);
+                declarador.setTamanhoVetor(0); // sem tamanho explícito
             }
         }
-
         if (ctx.inicializador() != null) {
             declarador.setInicializador(visit(ctx.inicializador()));
         }
