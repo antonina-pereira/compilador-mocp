@@ -1,0 +1,37 @@
+/* * caso_insucesso_complexo.mocp
+ * Objetivo: Forçar todos os erros semânticos tratados recentemente
+ */
+
+inteiro processa_dados(inteiro);
+vazio principal(vazio);
+
+inteiro processa_dados(inteiro x) {
+    retornar x * 2;
+}
+
+vazio principal(vazio) {
+    inteiro a = 10;
+    real b = 5.5;
+
+    // ERRO 1: Atribuição incompatível (real para inteiro sem cast)
+    inteiro c = b;
+
+    // Teste de Escopo
+    se (a > 0) {
+        inteiro escondida = 99;
+    }
+    // ERRO 2: A variável 'escondida' morreu no exitScope() do 'se'
+    a = escondida;
+
+    // ERRO 3: Número incorreto de argumentos
+    processa_dados(a, b);
+
+    // ERRO 4: Tipo de argumento incorreto (espera inteiro, recebe real)
+    processa_dados(b);
+
+    // ERRO 5: Tentar fazer contas com uma função do tipo 'vazio'
+    inteiro d = a + escrever(a);
+
+    // ERRO 6: Função do tipo 'vazio' a tentar retornar um valor
+    retornar a;
+}

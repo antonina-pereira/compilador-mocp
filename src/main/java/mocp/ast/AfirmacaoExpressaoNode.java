@@ -14,7 +14,7 @@ public class AfirmacaoExpressaoNode extends AfirmacaoNode {
     }
 
     public ASTNode getExpressao() {
-      return expressao;
+        return expressao;
     }
 
     @Override

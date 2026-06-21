@@ -27,7 +27,16 @@ public class ASTBuilder extends MOCPBaseVisitor<ASTNode> {
     @Override
     public ASTNode visitDec_item(MOCPParser.Dec_itemContext ctx) {
         DeclaradorNode declarador = new DeclaradorNode(ctx.ID().getText());
-        if (ctx.inicializador() != null) declarador.setInicializador(visit(ctx.inicializador()));
+        if (ctx.ABRE_RET() != null) {
+            if (ctx.INT_VAL() != null) {
+                declarador.setTamanhoVetor(Integer.parseInt(ctx.INT_VAL().getText()));
+            } else {
+                declarador.setTamanhoVetor(0); // sem tamanho explícito
+            }
+        }
+        if (ctx.inicializador() != null) {
+            declarador.setInicializador(visit(ctx.inicializador()));
+        }
         return declarador;
     }
 
@@ -132,7 +141,15 @@ public class ASTBuilder extends MOCPBaseVisitor<ASTNode> {
     }
 
     @Override public ASTNode visitExprParenteses(MOCPParser.ExprParentesesContext ctx) { return visit(ctx.expressao()); }
-    @Override public ASTNode visitExprCast(MOCPParser.ExprCastContext ctx) { return new OpUnNode("(cast para " + ctx.tipo().getText() + ")", visit(ctx.expressao())); }
+    //Melhorado o output do TAC para quando ha um cast em vez de aparecer "(cast para real)" aparece "int2real" ou em vez de "(cast para inteiro)" agora aparece "real2int"
+    //É para ser mais facil ao fazer o gerador de assembly para entender essa instrucao.
+    @Override
+    public ASTNode visitExprCast(MOCPParser.ExprCastContext ctx) {
+        String tipoDestino = ctx.tipo().getText();
+        // Cria uma mnemónica limpa baseada no destino
+        String opCast = tipoDestino.equals("real") ? "int2real" : "real2int";
+        return new OpUnNode(opCast, visit(ctx.expressao()));
+    }
     @Override public ASTNode visitExprMenosUnario(MOCPParser.ExprMenosUnarioContext ctx) { return new OpUnNode("-", visit(ctx.expressao())); }
     @Override public ASTNode visitExprNao(MOCPParser.ExprNaoContext ctx) { return new OpUnNode("!", visit(ctx.expressao())); }
     @Override public ASTNode visitExprMultDiv(MOCPParser.ExprMultDivContext ctx) { return new OpBinNode(ctx.getChild(1).getText(), visit(ctx.expressao(0)), visit(ctx.expressao(1))); }
@@ -144,15 +161,30 @@ public class ASTBuilder extends MOCPBaseVisitor<ASTNode> {
     @Override public ASTNode visitExprVetorAtrib(MOCPParser.ExprVetorAtribContext ctx) { return new OpBinNode("=", new AcessoVetorNode(ctx.ID().getText(), visit(ctx.expressao(0))), visit(ctx.expressao(1))); }
     @Override public ASTNode visitExprVetor(MOCPParser.ExprVetorContext ctx) { return new AcessoVetorNode(ctx.ID().getText(), visit(ctx.expressao())); }
     @Override public ASTNode visitExprAtribuicao(MOCPParser.ExprAtribuicaoContext ctx) { return new OpBinNode("=", new IDNode(ctx.ID().getText()), visit(ctx.expressao())); }
-    @Override public ASTNode visitExprChamadaFuncao(MOCPParser.ExprChamadaFuncaoContext ctx) {
-        ChamadaFuncaoNode chamada = new ChamadaFuncaoNode(ctx.ID().getText());
-        if (ctx.lista_args() != null) for (MOCPParser.ExpressaoContext exprCtx : ctx.lista_args().expressao()) chamada.addArgumento(visit(exprCtx));
+    @Override
+    public ASTNode visitExprChamadaFuncao(MOCPParser.ExprChamadaFuncaoContext ctx) {
+        // CORREÇÃO: getChild(0) apanha o ID ou LER, ESCREVER, etc.
+        String nomeFuncao = ctx.getChild(0).getText();
+        ChamadaFuncaoNode chamada = new ChamadaFuncaoNode(nomeFuncao);
+
+        if (ctx.lista_args() != null) {
+            for (MOCPParser.ExpressaoContext exprCtx : ctx.lista_args().expressao()) {
+                chamada.addArgumento(visit(exprCtx));
+            }
+        }
         return chamada;
     }
     @Override public ASTNode visitExprInt(MOCPParser.ExprIntContext ctx) { return new LiteralIntNode(ctx.INT_VAL().getText()); }
     @Override public ASTNode visitExprReal(MOCPParser.ExprRealContext ctx) { return new LiteralRealNode(ctx.FLOAT_VAL().getText()); }
-    @Override public ASTNode visitExprString(MOCPParser.ExprStringContext ctx) { return new LiteralStringNode(ctx.STRING_VAL().getText()); }
-    @Override public ASTNode visitExprChar(MOCPParser.ExprCharContext ctx) { return new LiteralStringNode(ctx.CHAR_VAL().getText()); }
+    @Override
+    public ASTNode visitExprString(MOCPParser.ExprStringContext ctx) {
+        String text = ctx.STRING_VAL().getText();
+        // Remove as aspas duplas das extremidades
+        if (text.length() >= 2 && text.startsWith("\"") && text.endsWith("\"")) {
+            text = text.substring(1, text.length() - 1);
+        }
+        return new LiteralStringNode(text);
+    }
+    @Override public ASTNode visitExprChar(MOCPParser.ExprCharContext ctx) { return new LiteralCharNode(ctx.CHAR_VAL().getText()); }
     @Override public ASTNode visitExprId(MOCPParser.ExprIdContext ctx) { return new IDNode(ctx.ID().getText()); }
 }
-

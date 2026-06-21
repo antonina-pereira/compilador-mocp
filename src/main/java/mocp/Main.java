@@ -9,6 +9,7 @@ import mocp.semantic.SymbolTable;
 import mocp.codegen.CodeGenerator;
 
 import java.util.List;
+import mocp.codegen.CodeGenerator;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -87,11 +88,12 @@ public class Main {
     String code = gen.gerar(ast);
 
     // Guardar código gerado num ficheiro
-    try (FileWriter writer = new FileWriter("output/Program.java")) {
+    try (FileWriter writer = new FileWriter("output/Programa.java")) {
       writer.write(code);
       System.out.println("Ficheiro gerado com sucesso!");
     } catch (IOException e) {
       e.printStackTrace();
     }
+
   }
 }

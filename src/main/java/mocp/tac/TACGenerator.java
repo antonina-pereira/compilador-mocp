@@ -10,11 +10,17 @@ public class TACGenerator {
     private final LabelCreator labels = new LabelCreator();
     private final List<Instruction> instrucoes = new ArrayList<>();
 
+    /*Correçao: A funcao gerar() foi atualizada para processar nós do tipo DeclaracaoNode a nivel global
+    O código antes ignorava inicializacoes globais. exemplo: inteiro global = 10*/
     public List<Instruction> gerar(ASTNode programa) {
         System.out.println("\n--- A INICIAR GERAÇÃO DE CÓDIGO INTERMÉDIO (TAC) ---");
         if (programa instanceof ProgramaNode) {
             for (ASTNode elem : ((ProgramaNode) programa).getFilhos()) {
-                if (elem instanceof FuncaoNode) gerarFuncao((FuncaoNode) elem);
+                if (elem instanceof FuncaoNode) {
+                    gerarFuncao((FuncaoNode) elem);
+                } else if (elem instanceof DeclaracaoNode) {
+                    gerarDeclaracao((DeclaracaoNode) elem);
+                }
             }
         }
         imprimirInstrucoes();
@@ -100,7 +106,21 @@ public class TACGenerator {
         if (no instanceof IDNode) return ((IDNode) no).getNome();
         if (no instanceof LiteralIntNode) return ((LiteralIntNode) no).getValor();
         if (no instanceof LiteralRealNode) return ((LiteralRealNode) no).getValor();
-        if (no instanceof OpUnNode) return gerarExpressao(((OpUnNode) no).getExpressao());
+        /*Correção: Adicionado verificacões para LiteralStringNode e LiteralCharNode, retornando o valor diretamente*/
+        if (no instanceof LiteralStringNode) return ((LiteralStringNode) no).getValor();
+        if (no instanceof LiteralCharNode) return ((LiteralCharNode) no).getValor();
+
+        /*Correção: No processamento do OpUnNode, criar variaveis temporarias e emitir instricoes explicitas
+        * ex: gerar OpUnIntr(dest,op,operando) em vez de devolver a apenas a expressao interna.
+        * É crucial para o Constant Folding funcionar */
+        if (no instanceof OpUnNode) {
+            OpUnNode unNode = (OpUnNode) no;
+            String operando = gerarExpressao(unNode.getExpressao());
+            String dest = temps.newTemp();
+            emit(new OpUnInstr(dest, unNode.getOperador(), operando));
+            return dest;
+        }
+
         if (no instanceof ChamadaFuncaoNode) {
             ChamadaFuncaoNode call = (ChamadaFuncaoNode) no;
             for (ASTNode arg : call.getArgumentos()) emit(new ParamInstr(gerarExpressao(arg)));

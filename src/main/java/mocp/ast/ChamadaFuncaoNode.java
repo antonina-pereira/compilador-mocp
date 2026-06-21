@@ -23,8 +23,6 @@ public class ChamadaFuncaoNode extends ASTNode {
         if (arg != null) argumentos.add(arg);
     }
 
-    // MÉTODOS ADICIONADOS PARA O TACGenerator:
-
     public String getNome() {
         return nome;
     }
@@ -37,7 +35,7 @@ public class ChamadaFuncaoNode extends ASTNode {
     public void print(String indent) {
         System.out.println(indent + "Chamada Funcao: " + nome);
         for (ASTNode arg : argumentos) {
-            arg.print(indent + "  [Arg]: ");
+            if (arg != null) arg.print(indent + "  [Arg]: ");
         }
     }
 }

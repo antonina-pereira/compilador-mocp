@@ -1,0 +1,220 @@
+/* ====================================================================
+   PROGRAMA COMPLETO DE DEMONSTRAÇÃO - MOCP
+   ====================================================================
+   Testa:
+     - Protótipos, variáveis globais, vetores
+     - Funções com parâmetros e retorno (incluindo recursão)
+     - Casts, operadores unários, aritméticos, relacionais e lógicos
+     - Estruturas se, enquanto, para
+     - I/O: ler, lerc, lers, escrever, escreverc, escrevers, escreverv
+     - Literais string e char
+     - Escopos e visibilidade
+   ==================================================================== */
+
+// =================== PROTÓTIPOS ===================
+vazio cabecalho(vazio);
+inteiro fatorial(inteiro);
+real media(inteiro[], inteiro);
+vazio processar_vetor(vazio);
+inteiro soma_vetor(inteiro[], inteiro);
+vazio escrever_vetor(inteiro[], inteiro);
+inteiro eh_primo(inteiro);
+vazio principal(vazio);
+
+// =================== GLOBAIS ===================
+inteiro TAMANHO_MAX = 100;
+real PI = 3.14159;
+inteiro contador = 0;
+
+// =================== FUNÇÕES AUXILIARES ===================
+
+/* Função vazia com I/O */
+vazio cabecalho(vazio) {
+    escrevers("===== PROGRAMA DE TESTE MOCP =====\n");
+}
+
+/* Fatorial recursivo */
+inteiro fatorial(inteiro n) {
+    se (n <= 1) {
+        retornar 1;
+    } senao {
+        retornar n * fatorial(n - 1);
+    }
+}
+
+/* Média de um vetor de inteiros */
+real media(inteiro v[], inteiro tamanho) {
+    inteiro i;
+    real soma = 0.0;
+    para (i = 0; i < tamanho; i = i + 1) {
+        soma = soma + (real)v[i];
+    }
+    retornar soma / (real)tamanho;
+}
+
+/* Soma dos elementos de um vetor */
+inteiro soma_vetor(inteiro v[], inteiro tamanho) {
+    inteiro i;
+    inteiro soma = 0;
+    para (i = 0; i < tamanho; i = i + 1) {
+        soma = soma + v[i];
+    }
+    retornar soma;
+}
+
+/* Escreve vetor formatado com chavetas */
+vazio escrever_vetor(inteiro v[], inteiro tamanho) {
+    inteiro i;
+    escrevers("{");
+    para (i = 0; i < tamanho; i = i + 1) {
+        escrever(v[i]);
+        se (i < tamanho - 1) {
+            escrevers(", ");
+        }
+    }
+    escrevers("}\n");
+}
+
+/* Teste de primalidade (otimizado) */
+inteiro eh_primo(inteiro n) {
+    inteiro i;
+    se (n <= 1) { retornar 0; }
+    se (n == 2) { retornar 1; }
+    se (n % 2 == 0) { retornar 0; }
+    i = 3;
+    enquanto (i * i <= n) {
+        se (n % i == 0) { retornar 0; }
+        i = i + 2;
+    }
+    retornar 1;
+}
+
+/* =================== FUNÇÃO PRINCIPAL =================== */
+vazio principal(vazio) {
+    // ---------- CABEÇALHO ----------
+    cabecalho();
+
+    // ---------- VARIÁVEIS LOCAIS ----------
+    inteiro n, i, opcao;
+    inteiro v[10];
+    real r;
+    inteiro carac;
+    inteiro vetor_lido[];   // vetor sem tamanho fixo (vai ser preenchido)
+    inteiro tamanho_lido = 0;
+
+    // ---------- TESTE DE CAST E UNÁRIO ----------
+    inteiro a = -5;
+    real b = (real)(-a) * 2.5;
+    escrevers("Teste cast/unário: a = ");
+    escrever(a);
+    escrevers(", b = ");
+    escrever(b);
+    escrevers("\n");
+
+    // ---------- TESTE DE LEITURA DE CARACTER E STRING ----------
+    escrevers("Digite um caractere: ");
+    carac = lerc();
+    escreverc(carac);
+    escrevers("\n");
+
+    escrevers("Digite uma string (máx 10): ");
+    vetor_lido = lers();   // lê string para vetor de inteiros terminado em 0
+    // Neste ponto, a função lers() devolve um vetor; vamos simular tamanho
+    // (usamos 10 para simplificar, mas o TAC não suporta tamanho dinâmico)
+    // Contudo, podemos usar um loop para contar até ao 0
+    tamanho_lido = 0;
+    enquanto (vetor_lido[tamanho_lido] != 0) {
+        tamanho_lido = tamanho_lido + 1;
+    }
+    escrevers("String lida: ");
+    escrevers(vetor_lido);   // escrevers imprime como string
+    escrevers("\n");
+
+    // ---------- PREENCHER VETOR COM DADOS ----------
+    n = ler();
+    n = 5;  // fixo para teste
+    para (i = 0; i < n; i = i + 1) {
+        v[i] = i * 2 + 1;  // 1,3,5,7,9
+    }
+
+    // ---------- CHAMADA DE FUNÇÕES ----------
+    inteiro soma = soma_vetor(v, n);
+    real med = media(v, n);
+    escrevers("Vetor: ");
+    escrever_vetor(v, n);
+    escrevers("Soma = ");
+    escrever(soma);
+    escrevers("\n");
+    escrevers("Média = ");
+    escrever(med);
+    escrevers("\n");
+
+    // ---------- FATORIAL RECURSIVO ----------
+    escrevers("Fatorial de 5: ");
+    escrever(fatorial(5));
+    escrevers("\n");
+
+    // ---------- TESTE DE PRIMALIDADE ----------
+    escrevers("Números primos até 20: ");
+    para (i = 2; i <= 20; i = i + 1) {
+        se (eh_primo(i) == 1) {
+            escrever(i);
+            escrevers(" ");
+        }
+    }
+    escrevers("\n");
+
+    // ---------- TESTE DE ESTRUTURA SE/SENAO E OPERADORES LÓGICOS ----------
+    inteiro x = 10, y = 20;
+    se (x > 0 && y > 0) {
+        escrevers("Ambos positivos\n");
+    } senao {
+        escrevers("Algum não é positivo\n");
+    }
+
+    // ---------- TESTE DE CICLO ENQUANTO ----------
+    inteiro count = 0;
+    enquanto (count < 3) {
+        escrevers("count = ");
+        escrever(count);
+        escrevers("\n");
+        count = count + 1;
+    }
+
+    // ---------- TESTE DE CICLO PARA COM ATRIBUIÇÃO COMPOSTA (apenas =) ----------
+    para (i = 0; i < 5; i = i + 1) {
+        v[i] = v[i] * 2;
+    }
+    escrevers("Vetor após duplicar: ");
+    escrever_vetor(v, n);
+
+    // ---------- TESTE DE CAST DE REAL PARA INTEIRO ----------
+    real pi = PI;
+    inteiro pi_int = (inteiro)pi;
+    escrevers("PI = ");
+    escrever(pi);
+    escrevers(", PI como inteiro = ");
+    escrever(pi_int);
+    escrevers("\n");
+
+    // ---------- TESTE DE OPERADOR LÓGICO NÃO (!) ----------
+    inteiro flag = 1;
+    se (!flag) {
+        escrevers("Flag é falso\n");
+    } senao {
+        escrevers("Flag é verdadeiro\n");
+    }
+
+    // ---------- TESTE DE ACESSO A VETOR COM ÍNDICE VARIÁVEL ----------
+    escrevers("v[3] = ");
+    escrever(v[3]);
+    escrevers("\n");
+
+    // ---------- TESTE DE ESCRITA DE CARACTER ----------
+    inteiro c = 65;  // 'A'
+    escreverc(c);    // deve imprimir A
+    escrevers("\n");
+
+    // ---------- TESTE DE ESCRITA DE STRING LITERAL ----------
+    escrevers("Fim do programa!\n");
+}

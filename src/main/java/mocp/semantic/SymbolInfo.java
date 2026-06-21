@@ -7,21 +7,29 @@ public class SymbolInfo {
     private String nome;
     private String tipo;        // "inteiro", "real", ou "vazio"
     private Categoria categoria;
+    private boolean isVetor;    // true se for um vetor
 
-    // Se for FUNCAO ou PROTOTIPO, guardamos a lista dos tipos dos parâmetros
-    // Ex: para a função fact(inteiro k), esta lista terá ["inteiro"]
     private List<String> tiposParametros;
 
-    public SymbolInfo(String nome, String tipo, Categoria categoria) {
+    // Construtor principal (com isVetor)
+    public SymbolInfo(String nome, String tipo, Categoria categoria, boolean isVetor) {
         this.nome = nome;
         this.tipo = tipo;
         this.categoria = categoria;
+        this.isVetor = isVetor;
         this.tiposParametros = new ArrayList<>();
+    }
+
+    // Construtor para compatibilidade (assume não vetor)
+    public SymbolInfo(String nome, String tipo, Categoria categoria) {
+        this(nome, tipo, categoria, false);
     }
 
     public String getNome() { return nome; }
     public String getTipo() { return tipo; }
     public Categoria getCategoria() { return categoria; }
+    public boolean isVetor() { return isVetor; }
+    public void setVetor(boolean v) { isVetor = v; }
 
     public List<String> getTiposParametros() { return tiposParametros; }
 
@@ -29,12 +37,12 @@ public class SymbolInfo {
         this.tiposParametros.add(tipoParam);
     }
 
-    // Método utilitário para facilitar a impressão da tabela (Debug)
     @Override
     public String toString() {
+        String tipoCompleto = isVetor ? tipo + "[]" : tipo;
         if (categoria == Categoria.FUNCAO || categoria == Categoria.PROTOTIPO) {
             return categoria + " " + nome + "(" + String.join(", ", tiposParametros) + ") -> " + tipo;
         }
-        return categoria + " " + tipo + " " + nome;
+        return categoria + " " + tipoCompleto + " " + nome;
     }
 }

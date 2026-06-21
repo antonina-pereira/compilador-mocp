@@ -1,0 +1,46 @@
+/* * caso_sucesso_complexo.mocp
+ * Valida: Protótipos, Globais, Escopos, Casts, I/O e Unários
+ */
+
+// Protótipos ANTES das globais
+vazio cabecalho(vazio);
+real calcula_desconto(inteiro);
+vazio principal(vazio);
+
+// Declarações Globais
+inteiro taxa_base = 23;
+real limite = 100.0;
+
+vazio cabecalho(vazio) {
+    escrevers("--- Sistema de Calculo ---\n");
+}
+
+real calcula_desconto(inteiro valor) {
+    // Cast explícito e unário negativo
+    real ajuste = (real)(-valor) * 0.1;
+    retornar (real)valor + ajuste;
+}
+
+vazio principal(vazio) {
+    cabecalho(); // Chamada de 0 argumentos
+
+    // MOCP: inteiros podem guardar ASCII de caracteres
+    inteiro modo = 'A';
+    escreverc(modo);
+
+    escrevers("\nIntroduza um valor: ");
+    inteiro entrada = ler(); // Função I/O mapeada no SemanticAnalyzer
+    real resultado_final;
+
+    se (entrada > 0) {
+        // Bloco A: Cria o seu próprio 'temp'
+        inteiro temp = entrada + taxa_base;
+        resultado_final = calcula_desconto(temp);
+    } senao {
+        // Bloco B: Cria um 'temp' paralelo (testa o enterScope/exitScope)
+        inteiro temp = (inteiro) limite; // Cast explícito de real para inteiro
+        resultado_final = (real)temp;    // Promoção
+    }
+
+    escrever(resultado_final);
+}

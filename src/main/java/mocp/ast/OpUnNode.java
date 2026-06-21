@@ -14,6 +14,10 @@ public class OpUnNode extends ASTNode {
         this.expressao = expressao;
     }
 
+    public String getOperador() {
+        return operador;
+    }
+
     public ASTNode getExpressao() {
         return expressao;
     }

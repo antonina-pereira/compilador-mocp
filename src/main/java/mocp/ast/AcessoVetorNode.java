@@ -15,10 +15,12 @@ public class AcessoVetorNode extends ASTNode {
         this.indice = indice;
     }
 
+    // O TACGenerator usa getId()
     public String getId() {
         return id;
     }
 
+    // O TACGenerator usa getIndice()
     public ASTNode getIndice() {
         return indice;
     }
