@@ -2,16 +2,16 @@
  * Testa: Protótipos, Globais, Strings, Chars, Unários, Casts, I/O e Escopos
  */
 
-// 1. Protótipos declarados antes de qualquer variável ou função
+// Protótipos declarados antes de qualquer variável ou função
 inteiro calcula_dobro(inteiro);
 vazio saudacao(vazio);
 vazio principal(vazio);
 
-// 2. Declarações Globais com inicialização (Antes o teu TAC ignorava isto)
+// Declarações Globais com inicialização (Antes o teu TAC ignorava isto)
 inteiro fator_global = 2;
 real pi = 3.1415;
 
-// 3. Funções auxiliares
+// Funções auxiliares
 inteiro calcula_dobro(inteiro x) {
     retornar x * fator_global;
 }
@@ -21,7 +21,7 @@ vazio saudacao(vazio) {
     escrevers("Bem-vindo ao Compilador MOCP!");
 }
 
-// 4. Função Principal obrigatória
+// Função Principal obrigatória
 vazio principal(vazio) {
     inteiro n;
     real resultado;
@@ -29,7 +29,7 @@ vazio principal(vazio) {
     // Testa literal Char
     inteiro letra = 'A';
 
-    // Testa Chamada de Função (Agora a análise semântica valida a assinatura)
+    // Testa Chamada de Função (análise semântica valida a assinatura)
     saudacao();
 
     escrevers("Introduza um numero: ");
@@ -37,7 +37,7 @@ vazio principal(vazio) {
     // Testa I/O como atribuição
     n = ler();
 
-    // Testa Operador Unário e Cast (Agora o teu TAC gera código para isto)
+    // Testa Operador Unário e Cast (TAC gera código para isto)
     resultado = (real)(-n);
 
     // Testa Escopos de Blocos (As variáveis aqui dentro não podem "vazar")
