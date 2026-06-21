@@ -7,6 +7,7 @@ public class CodeGenerator {
 
     private StringBuilder sb;
     private int indent = 0;
+    private boolean usaStrings = false; //para se for preciso utilizar funcoes auxiliares que nao existe por padrao em java
 
     private void tab() {
         for (int i = 0; i < indent; i++) sb.append("  ");
@@ -15,39 +16,43 @@ public class CodeGenerator {
     public String gerar(ASTNode ast) {
         System.out.println("DEBUG: CodeGenerator.gerar() foi chamado!");
         sb = new StringBuilder();
-        sb.append("import java.util.Scanner;\n\n");
+
+        if(usaStrings) sb.append("import java.util.Scanner;\n\n");
         sb.append("class Main {\n");
         indent++;
 
         tab();
-        sb.append("private static Scanner scanner = new Scanner(System.in);\n\n");
+        if(usaStrings) sb.append("private static Scanner scanner = new Scanner(System.in);\n\n");
 
-        // --- FUNÇÕES AUXILIARES INJETADAS ---
-        tab();
-        sb.append("public static int[] lerStringParaVetor(String s) {\n");
-        indent++;
-        tab(); sb.append("int[] v = new int[s.length() + 1];\n");
-        tab(); sb.append("for (int i = 0; i < s.length(); i++) {\n");
-        indent++;
-        tab(); sb.append("v[i] = (int) s.charAt(i);\n");
-        indent--;
-        tab(); sb.append("}\n");
-        tab(); sb.append("v[s.length()] = 0;\n");
-        tab(); sb.append("return v;\n");
-        indent--;
-        tab(); sb.append("}\n\n");
+        if(usaStrings){
+            // --- FUNÇÕES AUXILIARES INJETADAS ---
+            tab();
+            sb.append("public static int[] lerStringParaVetor(String s) {\n");
+            indent++;
+            tab(); sb.append("int[] v = new int[s.length() + 1];\n");
+            tab(); sb.append("for (int i = 0; i < s.length(); i++) {\n");
+            indent++;
+            tab(); sb.append("v[i] = (int) s.charAt(i);\n");
+            indent--;
+            tab(); sb.append("}\n");
+            tab(); sb.append("v[s.length()] = 0;\n");
+            tab(); sb.append("return v;\n");
+            indent--;
+            tab(); sb.append("}\n\n");
 
-        tab();
-        sb.append("public static void imprimirStringVetor(int[] v) {\n");
-        indent++;
-        tab(); sb.append("for (int i = 0; i < v.length && v[i] != 0; i++) {\n");
-        indent++;
-        tab(); sb.append("System.out.print((char) v[i]);\n");
-        indent--;
-        tab(); sb.append("}\n");
-        indent--;
-        tab(); sb.append("}\n\n");
-        // ------------------------------------
+            tab();
+            sb.append("public static void imprimirStringVetor(int[] v) {\n");
+            indent++;
+            tab(); sb.append("for (int i = 0; i < v.length && v[i] != 0; i++) {\n");
+            indent++;
+            tab(); sb.append("System.out.print((char) v[i]);\n");
+            indent--;
+            tab(); sb.append("}\n");
+            indent--;
+            tab(); sb.append("}\n\n");
+            // ------------------------------------
+        }
+
 
         if (ast instanceof ProgramaNode) {
             // 1. Declarações globais (variáveis)
@@ -369,25 +374,31 @@ public class CodeGenerator {
 
         switch (nome) {
             case "ler":
+                usaStrings = true; // Ativa a flag
                 sb.append("scanner.nextInt()");
                 break;
             case "lerc":
+                usaStrings = true; // Ativa a flag
                 sb.append("scanner.next().charAt(0)");
                 break;
             case "lers":
+                usaStrings = true; // Ativa a flag
                 sb.append("lerStringParaVetor(scanner.next())");
                 break;
             case "escrever":
+                usaStrings = true; // Ativa a flag
                 sb.append("System.out.print(");
                 if (!args.isEmpty()) gerarExpressao(args.get(0));
                 sb.append(")");
                 break;
             case "escreverc":
+                usaStrings = true; // Ativa a flag
                 sb.append("System.out.print((char)(");
                 if (!args.isEmpty()) gerarExpressao(args.get(0));
                 sb.append("))");
                 break;
             case "escreverv":
+                usaStrings = true; // Ativa a flag
                 if (!args.isEmpty()) {
                     sb.append("imprimirVetor(");
                     gerarExpressao(args.get(0));
@@ -395,6 +406,7 @@ public class CodeGenerator {
                 }
                 break;
             case "escrevers":
+                usaStrings = true; // Ativa a flag
                 if (!args.isEmpty()) {
                     ASTNode arg = args.get(0);
                     if (arg instanceof LiteralStringNode) {
