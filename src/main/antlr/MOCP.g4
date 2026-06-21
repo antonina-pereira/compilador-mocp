@@ -61,18 +61,21 @@ instrucao_para : PARA ABRE_PAR expressao? PONTO_VIRG expressao? PONTO_VIRG expre
 expressao
     : ABRE_PAR expressao FECHA_PAR                                  # exprParenteses
     | ABRE_PAR tipo FECHA_PAR expressao                             # exprCast
-    | MENOS expressao                                               # exprMenosUnario // Adicionado Menos Unário
+    | MENOS expressao                                               # exprMenosUnario
     | NAO_LOGICO expressao                                          # exprNao
     | expressao (MULT | DIV | MODULO) expressao                     # exprMultDiv
     | expressao (MAIS | MENOS) expressao                            # exprSomaSub
     | expressao (MAIOR|MENOR|MAIOR_IGUAL|MENOR_IGUAL) expressao     # exprRelacional
     | expressao (IGUAL|DIFERENTE) expressao                         # exprIgualdade
     | expressao E_LOGICO expressao                                  # exprE
-    | expressao OU_LOGICO expressao                                 # exprOu
-    | <assoc=right> ID ABRE_RET expressao FECHA_RET ATRIB expressao # exprVetorAtrib  // Associatividade à direita
-    | ID ABRE_RET expressao FECHA_RET                               # exprVetor       // Separado para associatividade
-    | <assoc=right> ID ATRIB expressao                              # exprAtribuicao  // Associatividade à direita
-    | ID ABRE_PAR lista_args? FECHA_PAR                             # exprChamadaFuncao
+    | expressao OU_LOGICO expressao                                  # exprOu
+    | <assoc=right> ID ABRE_RET expressao FECHA_RET ATRIB expressao # exprVetorAtrib
+    | ID ABRE_RET expressao FECHA_RET                               # exprVetor
+    | <assoc=right> ID ATRIB expressao                              # exprAtribuicao
+
+    //Correção: Antes aceitava apenas ID(...), agora ceita ID ou qualquer token de I/O antes do abre parêntesis
+    | (ID | LER | LERC | LERS | ESCREVER | ESCREVERC | ESCREVERV | ESCREVERS) ABRE_PAR lista_args? FECHA_PAR # exprChamadaFuncao
+
     | INT_VAL                                                       # exprInt
     | FLOAT_VAL                                                     # exprReal
     | STRING_VAL                                                    # exprString

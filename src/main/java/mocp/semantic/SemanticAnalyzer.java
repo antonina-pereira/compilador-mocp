@@ -1,6 +1,7 @@
 package mocp.semantic;
 
 import mocp.ast.*;
+import java.util.List;
 
 public class SemanticAnalyzer {
 
@@ -30,9 +31,7 @@ public class SemanticAnalyzer {
         if (no == null) return;
 
         if (no instanceof ProgramaNode) {
-            // REGRA DO ENUNCIADO: Os protótipos têm de vir antes de qualquer variável ou função
             boolean podeTerPrototipo = true;
-
             for (ASTNode filho : ((ProgramaNode) no).getFilhos()) {
                 if (filho instanceof PrototipoNode) {
                     if (!podeTerPrototipo) {
@@ -40,7 +39,7 @@ public class SemanticAnalyzer {
                     }
                     validarPrototipo((PrototipoNode) filho);
                 } else {
-                    podeTerPrototipo = false; // Apanhou uma declaração ou função; bloqueia novos protótipos
+                    podeTerPrototipo = false;
                     validarNo(filho);
                 }
             }
@@ -51,10 +50,13 @@ public class SemanticAnalyzer {
         else if (no instanceof FuncaoNode) {
             validarFuncao((FuncaoNode) no);
         }
+        // CORREÇÃO 1: Gestão correta de escopo para blocos compostos { ... }
         else if (no instanceof AfirmacaoCompostaNode) {
+            tabelaSimbolos.enterScope();
             for (ASTNode instr : ((AfirmacaoCompostaNode) no).getInstrucoes()) {
                 validarNo(instr);
             }
+            tabelaSimbolos.exitScope();
         }
         else if (no instanceof SeNode) {
             validarNo(((SeNode) no).getCondicao());
@@ -63,7 +65,14 @@ public class SemanticAnalyzer {
         }
         else if (no instanceof RetornarNode) {
             ASTNode expr = ((RetornarNode) no).getExpressao();
-            if (expr != null) validarNo(expr);
+            if (expr != null) {
+                validarNo(expr);
+                String tipoRetornado = deduzirTipo(expr);
+                // CORREÇÃO 3: Verificação rigorosa do tipo de retorno face à assinatura
+                if (!tipoFuncaoAtual.equals("vazio") && !tiposCompativeis(tipoFuncaoAtual, tipoRetornado)) {
+                    reportarErro("Incompatibilidade: A função espera retornar '" + tipoFuncaoAtual + "' mas obteve '" + tipoRetornado + "'!");
+                }
+            }
 
             if (tipoFuncaoAtual.equals("vazio") && expr != null) {
                 reportarErro("Incompatibilidade: Uma função do tipo 'vazio' não pode retornar valores!");
@@ -72,9 +81,24 @@ public class SemanticAnalyzer {
                 reportarErro("Incompatibilidade: A função tem o tipo '" + tipoFuncaoAtual + "' mas o 'retornar' está vazio!");
             }
         }
+        // CORREÇÃO 2 & 3: Suporte e validação de Chamadas de Função e Tipos
+        else if (no instanceof ChamadaFuncaoNode) {
+            validarChamadaFuncao((ChamadaFuncaoNode) no);
+        }
         else if (no instanceof OpBinNode) {
-            validarNo(((OpBinNode) no).getEsquerda());
-            validarNo(((OpBinNode) no).getDireita());
+            OpBinNode opBin = (OpBinNode) no;
+            validarNo(opBin.getEsquerda());
+            validarNo(opBin.getDireita());
+
+            String tEsq = deduzirTipo(opBin.getEsquerda());
+            String tDir = deduzirTipo(opBin.getDireita());
+            if (!tiposCompativeis(tEsq, tDir)) {
+                reportarErro("Incompatibilidade de tipos na operação '" + opBin.getOperador() + "': não é possível operar '" + tEsq + "' com '" + tDir + "'!");
+            }
+        }
+        else if (no instanceof OpUnNode) {
+            // Valida a expressão que está lá dentro
+            validarNo(((OpUnNode) no).getExpressao());
         }
         else if (no instanceof IDNode) {
             validarUsoVariavel((IDNode) no);
@@ -106,6 +130,10 @@ public class SemanticAnalyzer {
                 }
                 if (declarador.getInicializador() != null) {
                     validarNo(declarador.getInicializador());
+                    String tipoInit = deduzirTipo(declarador.getInicializador());
+                    if (!tiposCompativeis(tipo, tipoInit)) {
+                        reportarErro("Incompatibilidade de tipos: Inicializador do tipo '" + tipoInit + "' não pode ser atribuído a '" + tipo + "'!");
+                    }
                 }
             }
         }
@@ -115,36 +143,35 @@ public class SemanticAnalyzer {
         String nome = funcao.getNome();
         tipoFuncaoAtual = funcao.getTipo();
 
-        // 1. Registar função no escopo Global
         SymbolInfo infoFuncao = new SymbolInfo(nome, tipoFuncaoAtual, Categoria.FUNCAO);
+        if (funcao.getParametros() instanceof AfirmacaoCompostaNode) {
+            for (ASTNode paramNo : ((AfirmacaoCompostaNode) funcao.getParametros()).getInstrucoes()) {
+                if (paramNo instanceof ParametroNode) {
+                    infoFuncao.addTipoParametro(((ParametroNode) paramNo).getTipo());
+                }
+            }
+        }
+
         if (!tabelaSimbolos.inserir(infoFuncao)) {
-            // Se já existir, pode ser o protótipo! Verificamos:
             SymbolInfo existente = tabelaSimbolos.procurar(nome);
             if (existente != null && existente.getCategoria() != Categoria.PROTOTIPO) {
                 reportarErro("Já existe uma declaração com o nome '" + nome + "'!");
             } else if (existente != null && existente.getCategoria() == Categoria.PROTOTIPO) {
-                // Se era um protótipo, atualizamos a categoria para FUNCAO (já foi implementada)
                 tabelaSimbolos.inserir(infoFuncao);
             }
         }
 
-        // 2. Entrar no escopo local da função
         tabelaSimbolos.enterScope();
 
-        // 3. Registar os parâmetros da função como variáveis locais no novo escopo!
         if (funcao.getParametros() != null) {
             ASTNode params = funcao.getParametros();
-            // No ASTBuilder, nós guardámos a lista de parâmetros dentro de um AfirmacaoCompostaNode
             if (params instanceof AfirmacaoCompostaNode) {
                 for (ASTNode paramNo : ((AfirmacaoCompostaNode) params).getInstrucoes()) {
                     if (paramNo instanceof ParametroNode) {
                         ParametroNode pNode = (ParametroNode) paramNo;
-
-                        // Decide se é VETOR ou VARIAVEL simples
                         Categoria cat = pNode.isEsVetor() ? Categoria.VETOR : Categoria.VARIAVEL;
                         SymbolInfo infoParam = new SymbolInfo(pNode.getId(), pNode.getTipo(), cat);
 
-                        // Tenta registar o parâmetro na Tabela de Símbolos (no escopo local)
                         if (!tabelaSimbolos.inserir(infoParam)) {
                             reportarErro("O parâmetro '" + pNode.getId() + "' já foi declarado na assinatura desta função!");
                         }
@@ -153,14 +180,59 @@ public class SemanticAnalyzer {
             }
         }
 
-        // 4. Validar o bloco de código (instruções)
         if (funcao.getBloco() != null) {
-            validarNo(funcao.getBloco());
+            // CORREÇÃO: Cast explícito e seguro de ASTNode para AfirmacaoCompostaNode
+            if (funcao.getBloco() instanceof AfirmacaoCompostaNode) {
+                for (ASTNode instr : ((AfirmacaoCompostaNode) funcao.getBloco()).getInstrucoes()) {
+                    validarNo(instr);
+                }
+            } else {
+                validarNo(funcao.getBloco());
+            }
         }
 
-        // 5. Sair do escopo local (destrói as variáveis locais)
         tabelaSimbolos.exitScope();
         tipoFuncaoAtual = "";
+    }
+
+    // CORREÇÃO 2: Metodo dedicado para validação de Chamadas de Função e Tratar o parâmetro "vazio" como 0 argumentos
+    private void validarChamadaFuncao(ChamadaFuncaoNode call) {
+        String nome = call.getNome();
+
+        // Ignorar funções nativas de I/O na validação de assinatura se não estiverem na tabela
+        if (nome.equals("ler") || nome.equals("escrever") || nome.equals("lerc") || nome.equals("lers") || nome.equals("escrevers") || nome.equals("escreverc") || nome.equals("escreverv")) {
+            for (ASTNode arg : call.getArgumentos()) {
+                validarNo(arg);
+            }
+            return;
+        }
+
+        SymbolInfo funcInfo = tabelaSimbolos.procurar(nome);
+        if (funcInfo == null || (funcInfo.getCategoria() != Categoria.FUNCAO && funcInfo.getCategoria() != Categoria.PROTOTIPO)) {
+            reportarErro("A função '" + nome + "' não foi declarada ou estruturada antes de ser chamada!");
+            return;
+        }
+
+        List<ASTNode> argumentos = call.getArgumentos();
+        List<String> parametrosEsperados = funcInfo.getTiposParametros();
+
+        // Se o único parâmetro esperado for "vazio", então o número de argumentos esperados é 0
+        int numParametrosEsperados = (parametrosEsperados.size() == 1 && parametrosEsperados.get(0).equals("vazio")) ? 0 : parametrosEsperados.size();
+
+        if (argumentos.size() != numParametrosEsperados) {
+            reportarErro("Chamada incorreta da função '" + nome + "': Esperava " + numParametrosEsperados + " argumentos mas recebeu " + argumentos.size() + "!");
+            return;
+        }
+
+        for (int i = 0; i < argumentos.size(); i++) {
+            ASTNode arg = argumentos.get(i);
+            validarNo(arg);
+            String tArg = deduzirTipo(arg);
+            String tParam = parametrosEsperados.get(i);
+            if (!tiposCompativeis(tParam, tArg)) {
+                reportarErro("Erro no argumento " + (i + 1) + " da chamada a '" + nome + "': Tipo esperado é '" + tParam + "' mas foi passado '" + tArg + "'!");
+            }
+        }
     }
 
     private void validarUsoVariavel(IDNode idNode) {
@@ -169,6 +241,54 @@ public class SemanticAnalyzer {
         if (info == null) {
             reportarErro("A variável '" + nome + "' não foi declarada antes de ser utilizada!");
         }
+    }
+
+    // CORREÇÃO 3: Sistema auxiliar para dedução e compatibilidade de tipos ensinar os tipos de retorno das funções nativas do MOCP
+    private String deduzirTipo(ASTNode no) {
+        if (no == null) return "vazio";
+        if (no instanceof LiteralIntNode) return "inteiro";
+        if (no instanceof LiteralRealNode) return "real";
+        if (no instanceof LiteralStringNode) return "string";
+        if (no instanceof LiteralCharNode) return "char";
+
+        // CORREÇÃO: Ensinar o analisador a ler o tipo dos Casts e Unários!
+        // Substitui os contains() por verificações exatas das novas mnemónicas
+        if (no instanceof OpUnNode) {
+            OpUnNode unNode = (OpUnNode) no;
+            String op = unNode.getOperador();
+
+            if (op.equals("int2real")) return "real";
+            if (op.equals("real2int")) return "inteiro";
+
+            // Se for um "-" ou "!", herda o tipo da expressão interior
+            return deduzirTipo(unNode.getExpressao());
+        }
+
+        if (no instanceof IDNode) {
+            SymbolInfo inf = tabelaSimbolos.procurar(((IDNode) no).getNome());
+            return inf != null ? inf.getTipo() : "erro";
+        }
+        if (no instanceof OpBinNode) {
+            String tEsq = deduzirTipo(((OpBinNode) no).getEsquerda());
+            String tDir = deduzirTipo(((OpBinNode) no).getDireita());
+            if (tEsq.equals("real") || tDir.equals("real")) return "real";
+            return tEsq;
+        }
+        if (no instanceof ChamadaFuncaoNode) {
+            String nomeFunc = ((ChamadaFuncaoNode) no).getNome();
+            if (nomeFunc.equals("ler") || nomeFunc.equals("lerc") || nomeFunc.equals("lers")) return "inteiro";
+            if (nomeFunc.equals("escrever") || nomeFunc.equals("escreverc") || nomeFunc.equals("escrevers") || nomeFunc.equals("escreverv")) return "vazio";
+            SymbolInfo inf = tabelaSimbolos.procurar(nomeFunc);
+            return inf != null ? inf.getTipo() : "vazio";
+        }
+        return "inteiro";
+    }
+    // CORREÇÃO: Inteiros aceitam caracteres (ASCII) e strings
+    private boolean tiposCompativeis(String esperado, String recebido) {
+        if (esperado.equals(recebido)) return true;
+        if (esperado.equals("real") && recebido.equals("inteiro")) return true; // Promoção implícita
+        if (esperado.equals("inteiro") && (recebido.equals("char") || recebido.equals("string"))) return true; // MOCP: inteiros guardam ASCII
+        return false;
     }
 
     private void reportarErro(String mensagem) {

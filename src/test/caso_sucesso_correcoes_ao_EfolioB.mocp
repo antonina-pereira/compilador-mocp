@@ -1,0 +1,56 @@
+/* * Teste Global MOCP - Validação de Correções
+ * Testa: Protótipos, Globais, Strings, Chars, Unários, Casts, I/O e Escopos
+ */
+
+// 1. Protótipos declarados antes de qualquer variável ou função
+inteiro calcula_dobro(inteiro);
+vazio saudacao(vazio);
+vazio principal(vazio);
+
+// 2. Declarações Globais com inicialização (Antes o teu TAC ignorava isto)
+inteiro fator_global = 2;
+real pi = 3.1415;
+
+// 3. Funções auxiliares
+inteiro calcula_dobro(inteiro x) {
+    retornar x * fator_global;
+}
+
+vazio saudacao(vazio) {
+    // Testa funções de I/O e literais String (Antes dava erro no Parser)
+    escrevers("Bem-vindo ao Compilador MOCP!");
+}
+
+// 4. Função Principal obrigatória
+vazio principal(vazio) {
+    inteiro n;
+    real resultado;
+
+    // Testa literal Char
+    inteiro letra = 'A';
+
+    // Testa Chamada de Função (Agora a análise semântica valida a assinatura)
+    saudacao();
+
+    escrevers("Introduza um numero: ");
+
+    // Testa I/O como atribuição
+    n = ler();
+
+    // Testa Operador Unário e Cast (Agora o teu TAC gera código para isto)
+    resultado = (real)(-n);
+
+    // Testa Escopos de Blocos (As variáveis aqui dentro não podem "vazar")
+    se (n > 0) {
+        inteiro temp = n * 10;
+        escrever(temp);
+    } senao {
+        inteiro temp = 0; // Não deve dar erro de duplicação por causa dos escopos independentes
+        escrever(temp);
+    }
+
+    // Testa compatibilidade e promoção de tipos (calcula_dobro retorna inteiro, guardado em real)
+    resultado = calcula_dobro(n);
+
+    escrever(resultado);
+}
