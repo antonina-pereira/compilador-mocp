@@ -13,6 +13,10 @@ public class LiteralStringNode extends ASTNode {
 
     }
 
+    public String getValor() {
+      return conteudo.toString();
+    }
+
     @Override
     public void print(String indent) {
         System.out.println(indent + "Literal String: " + conteudo);

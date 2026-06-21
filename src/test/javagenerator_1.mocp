@@ -1,0 +1,4 @@
+inteiro principal() {
+    inteiro x = 5;
+    inteiro y = 3;
+}

@@ -13,6 +13,10 @@ public class AfirmacaoExpressaoNode extends AfirmacaoNode {
         this.expressao = expressao;
     }
 
+    public ASTNode getExpressao() {
+      return expressao;
+    }
+
     @Override
     public void print(String indent) {
         System.out.println(indent + "AfirmacaoExpressao");

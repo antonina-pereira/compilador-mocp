@@ -87,7 +87,7 @@ public class Main {
     String code = gen.gerar(ast);
 
     // Guardar código gerado num ficheiro
-    try (FileWriter writer = new FileWriter("output/Programa.java")) {
+    try (FileWriter writer = new FileWriter("output/Program.java")) {
       writer.write(code);
       System.out.println("Ficheiro gerado com sucesso!");
     } catch (IOException e) {
