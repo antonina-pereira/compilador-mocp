@@ -1,6 +1,7 @@
 package mocp.semantic;
 
 import mocp.ast.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SemanticAnalyzer {
@@ -8,6 +9,10 @@ public class SemanticAnalyzer {
     private SymbolTable tabelaSimbolos = new SymbolTable();
     private String tipoFuncaoAtual = "";
     private int numErros = 0;
+
+    // --- NOVAS LISTAS PARA RASTREIO DE PROTÓTIPOS ---
+    private List<String> prototiposDeclarados = new ArrayList<>();
+    private List<String> funcoesImplementadas = new ArrayList<>();
 
     public void analisar(ASTNode raiz) {
         System.out.println("\n--- A INICIAR ANÁLISE SEMÂNTICA ---");
@@ -18,6 +23,13 @@ public class SemanticAnalyzer {
         SymbolInfo principal = tabelaSimbolos.procurar("principal");
         if (principal == null || (principal.getCategoria() != Categoria.FUNCAO && principal.getCategoria() != Categoria.PROTOTIPO)) {
             reportarErro("A função 'principal' não foi encontrada no programa!");
+        }
+
+        // --- NOVA VERIFICAÇÃO: Protótipos sem corpo (Missing Implementation) ---
+        for (String proto : prototiposDeclarados) {
+            if (!funcoesImplementadas.contains(proto) && !proto.equals("principal")) {
+                reportarErro("A função '" + proto + "' foi declarada como protótipo, mas nunca foi implementada!");
+            }
         }
 
         if (numErros == 0) {
@@ -107,6 +119,10 @@ public class SemanticAnalyzer {
 
     private void validarPrototipo(PrototipoNode proto) {
         String nome = proto.getNome();
+
+        // --- ADICIONA À LISTA DE RASTREIO ---
+        prototiposDeclarados.add(nome);
+
         SymbolInfo info = new SymbolInfo(nome, proto.getTipo(), Categoria.PROTOTIPO);
         for (String param : proto.getTiposParametros()) {
             info.addTipoParametro(param);
@@ -144,6 +160,9 @@ public class SemanticAnalyzer {
     private void validarFuncao(FuncaoNode funcao) {
         String nome = funcao.getNome();
         tipoFuncaoAtual = funcao.getTipo();
+
+        // --- ADICIONA À LISTA DE RASTREIO ---
+        funcoesImplementadas.add(nome);
 
         SymbolInfo infoFuncao = new SymbolInfo(nome, tipoFuncaoAtual, Categoria.FUNCAO);
         if (funcao.getParametros() instanceof AfirmacaoCompostaNode) {

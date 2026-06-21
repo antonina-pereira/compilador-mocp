@@ -28,7 +28,7 @@ prototipo : tipo (ID | PRINCIPAL) ABRE_PAR prototipo_params? FECHA_PAR ;
 prototipo_params : param_tipo (VIRGULA param_tipo)* | T_VAZIO ;
 
 // param_tipo já não aceita T_VAZIO individualmente
-param_tipo : tipo (ABRE_RET FECHA_RET)? ;
+param_tipo : tipo ID? (ABRE_RET FECHA_RET)? ;
 
 funcao : tipo (ID | PRINCIPAL) ABRE_PAR parametros? FECHA_PAR bloco ;
 
