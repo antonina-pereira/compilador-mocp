@@ -3,6 +3,7 @@ package mocp.ast;
 public class DeclaradorNode extends ASTNode {
     private final String id;
     private ASTNode inicializador = null;
+    private int tamanhoVetor = -1; // -1 = não é vetor
 
     public DeclaradorNode(String id) {
         this.id = id;
@@ -12,7 +13,10 @@ public class DeclaradorNode extends ASTNode {
         this.inicializador = inicializador;
     }
 
-    // --- GETTERS ADICIONADOS PARA O SEMÂNTICO ---
+    public void setTamanhoVetor(int tamanho) {
+        this.tamanhoVetor = tamanho;
+    }
+
     public String getId() {
         return id;
     }
@@ -20,11 +24,15 @@ public class DeclaradorNode extends ASTNode {
     public ASTNode getInicializador() {
         return inicializador;
     }
-    // --------------------------------------------
+
+    public int getTamanhoVetor() {
+        return tamanhoVetor;
+    }
 
     @Override
     public void print(String indent) {
-        System.out.println(indent + "ID: " + id);
+        System.out.println(indent + "ID: " + id +
+                (tamanhoVetor >= 0 ? "[" + (tamanhoVetor == 0 ? "" : tamanhoVetor) + "]" : ""));
         if (inicializador != null) {
             System.out.println(indent + "  Initializador:");
             inicializador.print(indent + "    ");

@@ -27,7 +27,21 @@ public class ASTBuilder extends MOCPBaseVisitor<ASTNode> {
     @Override
     public ASTNode visitDec_item(MOCPParser.Dec_itemContext ctx) {
         DeclaradorNode declarador = new DeclaradorNode(ctx.ID().getText());
-        if (ctx.inicializador() != null) declarador.setInicializador(visit(ctx.inicializador()));
+
+        // Verifica se há definição de tamanho de vetor
+        if (ctx.ABRE_RET() != null) {
+            if (ctx.INT_VAL() != null) {
+                int tamanho = Integer.parseInt(ctx.INT_VAL().getText());
+                declarador.setTamanhoVetor(tamanho);
+            } else {
+                // Caso seja apenas "[]" sem tamanho explícito, usamos 0 para indicar vetor sem tamanho fixo
+                declarador.setTamanhoVetor(0);
+            }
+        }
+
+        if (ctx.inicializador() != null) {
+            declarador.setInicializador(visit(ctx.inicializador()));
+        }
         return declarador;
     }
 
@@ -167,7 +181,15 @@ public class ASTBuilder extends MOCPBaseVisitor<ASTNode> {
     }
     @Override public ASTNode visitExprInt(MOCPParser.ExprIntContext ctx) { return new LiteralIntNode(ctx.INT_VAL().getText()); }
     @Override public ASTNode visitExprReal(MOCPParser.ExprRealContext ctx) { return new LiteralRealNode(ctx.FLOAT_VAL().getText()); }
-    @Override public ASTNode visitExprString(MOCPParser.ExprStringContext ctx) { return new LiteralStringNode(ctx.STRING_VAL().getText()); }
+    @Override
+    public ASTNode visitExprString(MOCPParser.ExprStringContext ctx) {
+        String text = ctx.STRING_VAL().getText();
+        // Remove as aspas duplas das extremidades
+        if (text.length() >= 2 && text.startsWith("\"") && text.endsWith("\"")) {
+            text = text.substring(1, text.length() - 1);
+        }
+        return new LiteralStringNode(text);
+    }
     @Override public ASTNode visitExprChar(MOCPParser.ExprCharContext ctx) { return new LiteralCharNode(ctx.CHAR_VAL().getText()); }
     @Override public ASTNode visitExprId(MOCPParser.ExprIdContext ctx) { return new IDNode(ctx.ID().getText()); }
 }
