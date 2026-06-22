@@ -49,7 +49,7 @@ public class Main {
       System.exit(1);
     }
 
-    // Imprimir a AST
+    //Imprimir a AST
     System.out.println("AST:");
     ast.print("");
 
