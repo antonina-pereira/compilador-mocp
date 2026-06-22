@@ -8,6 +8,7 @@ public class CodeGenerator {
     private StringBuilder sb;
     private int indent = 0;
     private boolean usaStrings = false; //para se for preciso utilizar funcoes auxiliares que nao existe por padrao em java
+    private boolean inMain = false; // Rastreia se estamos dentro da função principal
 
     private void tab() {
         for (int i = 0; i < indent; i++) sb.append("  ");
@@ -124,7 +125,11 @@ public class CodeGenerator {
         tab();
         sb.append("public static void main(String[] args) {\n");
         indent++;
+
+        this.inMain = true; // LIGAMOS A FLAG
         gerarBloco(f.getBloco());
+        this.inMain = false; // DESLIGAMOS A FLAG
+
         indent--;
         tab();
         sb.append("}\n\n");
@@ -225,12 +230,26 @@ public class CodeGenerator {
     // ---------- RETURN ----------
     private void gerarReturn(RetornarNode ret) {
         tab();
-        sb.append("return");
-        if (ret.getExpressao() != null) {
-            sb.append(" ");
-            gerarExpressao(ret.getExpressao());
+
+        // Se estivermos na principal, traduzimos para System.exit()
+        if (this.inMain) {
+            if (ret.getExpressao() != null) {
+                sb.append("System.exit(");
+                gerarExpressao(ret.getExpressao());
+                sb.append(");\n");
+            } else {
+                sb.append("return;\n"); // Se for só um 'retornar;' sem valor
+            }
         }
-        sb.append(";\n");
+        // Se for numa função normal, traduzimos para o return clássico
+        else {
+            sb.append("return");
+            if (ret.getExpressao() != null) {
+                sb.append(" ");
+                gerarExpressao(ret.getExpressao());
+            }
+            sb.append(";\n");
+        }
     }
 
     // ---------- IF ----------

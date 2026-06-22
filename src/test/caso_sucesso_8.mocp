@@ -1,5 +1,0 @@
-inteiro soma(inteiro a, inteiro b);
-
-vazio principal(vazio) {
-    soma(1, 2);
-}

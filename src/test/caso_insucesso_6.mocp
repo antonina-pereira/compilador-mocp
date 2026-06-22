@@ -1,0 +1,14 @@
+/* Caso de insucesso: contém palavra-chave da linguagem C */
+inteiro fact(inteiro);
+
+inteiro fact(inteiro k) {
+    se (k <= 1) {
+        retornar 1;
+    } senao {
+        return k; /* Agora o 'k' já tem de ser reconhecido! */
+    }
+}
+
+vazio principal(vazio) {
+    inteiro n = 5;
+}

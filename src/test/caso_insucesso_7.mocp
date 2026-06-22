@@ -1,0 +1,4 @@
+/* Função não declarada */
+inteiro principal() {
+    foo(1, 2);
+}

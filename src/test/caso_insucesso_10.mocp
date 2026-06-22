@@ -1,0 +1,5 @@
+inteiro soma(inteiro a, inteiro b); //funcao nao foi declarada
+
+vazio principal(vazio) {
+    soma(1, 2);
+}
