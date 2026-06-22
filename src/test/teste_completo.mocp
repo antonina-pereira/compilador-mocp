@@ -15,7 +15,7 @@
 vazio cabecalho(vazio);
 inteiro fatorial(inteiro);
 real media(inteiro[], inteiro);
-vazio processar_vetor(vazio);
+// vazio processar_vetor(vazio);
 inteiro soma_vetor(inteiro[], inteiro);
 vazio escrever_vetor(inteiro[], inteiro);
 inteiro eh_primo(inteiro);
