@@ -1,13 +1,13 @@
 # Compilador MOCP2JAVA
 
-Implementação de um compilador para a linguagem MOCP, uma variante da linguagem C com sintaxe em português, que traduz um programa escrito em `.mocp` para código Java funcional e otimizado.
+Implementação de um compilador para a linguagem MOCP, uma variante da linguagem C com sintaxe em português, que traduz um programa escrito em `.mocp` para código Java funcional e para código intermédio otimizado (Three-address code).
 
 ## Arquitetura
 O compilador segue um pipeline estruturado e modular:
 1. **Frontend:** Análise Léxica (Lexer) e Sintática (Parser) com construção da Árvore Sintática Abstrata (AST) através de uma gramática desenvolvida para ANTLR4.
 2. **Análise Semântica:** Validação estrita de tipos, verificação dinâmica de escopos (escopos aninhados) e consistência total de declarações e assinaturas.
 3. **Middle-end (TAC):** Geração de Código de Três Endereços (Three-Address Code) achatado e linearizado.
-4. **Otimizador:** Aplicação iterativa de técnicas de otimização em código intermédio (*Constant Folding*, *Constant Propagation* e *Dead Code Elimination*) até atingir um estado de estabilidade (ponto fixo).
+4. **Otimizador de TAC:** Aplicação iterativa de técnicas de otimização em código intermédio (*Constant Folding*, *Constant Propagation* e *Dead Code Elimination*) até atingir um estado de estabilidade (ponto fixo).
 5. **Backend (Transpiler):** Geração de código Java estruturado (`Main.java`) a partir da AST validada, aplicando técnicas modernas de transpilação e empacotamento de dependências.
 
 ## Requisitos
