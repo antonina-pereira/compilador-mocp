@@ -6,6 +6,8 @@ import mocp.ast.ASTNode;
 import mocp.semantic.SemanticAnalyzer;
 import java.util.List;
 import mocp.codegen.CodeGenerator;
+
+import java.io.File;       // <-- NOVO IMPORT ADICIONADO
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -13,7 +15,7 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     if(args.length == 0) {
-      System.err.println("Uso: java mocp.Main <ficheiro.mocp>");
+      System.err.println("Uso: java -jar mocp.jar <ficheiro.mocp>");
       System.exit(1);
     }
 
@@ -83,11 +85,18 @@ public class Main {
     CodeGenerator gen = new CodeGenerator();
     String code = gen.gerar(ast);
 
+    // --- CRIAÇÃO AUTÓNOMA DA PASTA ---
+    File diretorio = new File("output");
+    if (!diretorio.exists()) {
+      diretorio.mkdirs(); // Cria a pasta "output" se ela não existir
+    }
+
     // Guardar código gerado num ficheiro
     try (FileWriter writer = new FileWriter("output/Programa.java")) {
       writer.write(code);
-      System.out.println("Ficheiro gerado com sucesso!");
+      System.out.println("Ficheiro gerado com sucesso em output/Programa.java!");
     } catch (IOException e) {
+      System.err.println("Erro fatal ao guardar ficheiro: " + e.getMessage());
       e.printStackTrace();
     }
 

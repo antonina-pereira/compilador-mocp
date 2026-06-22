@@ -46,4 +46,12 @@ run:
 	java -cp "$(BUILD_DIR)$(CP_SEP)$(ANTLR_JAR)" $(MAIN_CLASS) $(FILE)
 
 clean:
-	rm -rf $(BUILD_DIR) $(GEN_DIR)
+	rm -rf $(BUILD_DIR) $(GEN_DIR) mocp.jar
+
+# --- GERAR EXECUTÁVEL (FAT JAR) ---
+jar: compile
+	@echo "A extrair dependencias do ANTLR..."
+	@cd $(BUILD_DIR) && jar xf ../$(ANTLR_JAR)
+	@echo "A criar o mocp.jar..."
+	@jar cfe mocp.jar $(MAIN_CLASS) -C $(BUILD_DIR) .
+	@echo "Executável criado com sucesso: mocp.jar"
