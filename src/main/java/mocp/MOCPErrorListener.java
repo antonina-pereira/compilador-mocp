@@ -18,13 +18,26 @@ public class MOCPErrorListener extends BaseErrorListener {
                           RecognitionException e) {
     numErros++;
 
-    // Se a mensagem contiver "token recognition error", é um erro léxico
+    // 1. Se a mensagem contiver "token recognition error", é um erro léxico genérico (ex: caracteres não reconhecidos)
     if (msg != null && msg.contains("token recognition error")) {
       System.err.println("Erro léxico: " + msg + " na linha " + line + ", coluna " + charPositionInLine);
       return;
     }
 
-    // se não, trata como um erro sintático normal
+    // 2. NOVA VERIFICAÇÃO: Apanha o "Token Venenoso" das keywords de C
+    if (offendingSymbol instanceof Token) {
+      Token token = (Token) offendingSymbol;
+
+      // Verifica se o token pertence à nossa regra ERR_C_KEYWORD
+      if (token.getType() == MOCPLexer.ERR_C_KEYWORD) {
+        System.err.println("[Erro Léxico/Sintático] Linha " + line + ", coluna " + charPositionInLine +
+                ": Palavra-chave de C '" + token.getText() +
+                "' não é permitida. Na linguagem MOCP utilize o equivalente em português!");
+        return; // Retorna para não imprimir a mensagem sintática genérica abaixo
+      }
+    }
+
+    // 3. Se não for nenhum dos casos acima, trata como um erro sintático normal
     System.err.println("Erro na linha " + line + ", coluna " + charPositionInLine + ": " + msg);
   }
 
