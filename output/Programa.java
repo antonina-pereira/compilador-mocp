@@ -1,8 +1,17 @@
 class Main {
+  public static void imprimirVetor(int[] v) {
+    System.out.print("{");
+    for (int i = 0; i < v.length; i++) {
+      if (i > 0) System.out.print(",");
+      System.out.print(v[i]);
+    }
+    System.out.print("}");
+  }
+
   public static void main(String[] args) {
-    int x = 5;
-    int y = 3;
-    System.exit(1);
+    int[] vetor = {1, 2, 3};
+    imprimirVetor(vetor);
+    System.exit(0);
   }
 
 }

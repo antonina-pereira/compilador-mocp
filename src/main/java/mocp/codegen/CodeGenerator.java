@@ -7,7 +7,13 @@ public class CodeGenerator {
 
     private StringBuilder sb;
     private int indent = 0;
-    private boolean usaStrings = false; //para se for preciso utilizar funcoes auxiliares que nao existe por padrao em java
+
+    // --- FLAGS DE INJEÇÃO CIRÚRGICA ---
+    private boolean usaScanner = false;              // Apenas para import e instância do Scanner
+    private boolean usaHelperLerString = false;      // Apenas para injetar lerStringParaVetor()
+    private boolean usaHelperImprimirString = false; // Apenas para injetar imprimirStringVetor()
+    private boolean usaHelperImprimirVetor = false;  // Apenas para injetar imprimirVetor()
+
     private boolean inMain = false; // Rastreia se estamos dentro da função principal
 
     private void tab() {
@@ -15,10 +21,13 @@ public class CodeGenerator {
     }
 
     public String gerar(ASTNode ast) {
-        System.out.println("DEBUG: CodeGenerator.gerar() foi chamado!");
+        System.out.println("DEBUG: CodeGenerator.gerar() foi chamado. Código JAVA esta em output/Programa.java");
 
-        // Reset da flag para o caso de compilarmos vários ficheiros seguidos
-        this.usaStrings = false;
+        // Reset das flags para o caso de compilarmos vários ficheiros seguidos
+        this.usaScanner = false;
+        this.usaHelperLerString = false;
+        this.usaHelperImprimirString = false;
+        this.usaHelperImprimirVetor = false;
 
         // Passo 1: Construir o corpo do programa PRIMEIRO
         this.sb = new StringBuilder();
@@ -35,19 +44,24 @@ public class CodeGenerator {
             }
         }
 
-        // Guardamos o corpo gerado (neste ponto, a flag usaStrings já sabe se deve ser true ou false!)
+        // Guardamos o corpo gerado (neste ponto, as flags já sabem exatamente o que foi usado!)
         String corpoDoPrograma = sb.toString();
 
         // Passo 2: Montar o Ficheiro Final
         StringBuilder ficheiroFinal = new StringBuilder();
 
-        if (usaStrings) ficheiroFinal.append("import java.util.Scanner;\n\n");
+        // Só importa o Scanner se houver inputs
+        if (usaScanner) ficheiroFinal.append("import java.util.Scanner;\n\n");
+
         ficheiroFinal.append("class Main {\n");
 
-        if (usaStrings) {
+        if (usaScanner) {
             ficheiroFinal.append("  private static Scanner scanner = new Scanner(System.in);\n\n");
+        }
 
-            // --- FUNÇÕES AUXILIARES INJETADAS ---
+        // --- INJEÇÕES INDIVIDUAIS CIRÚRGICAS ---
+
+        if (usaHelperLerString) {
             ficheiroFinal.append("  public static int[] lerStringParaVetor(String s) {\n");
             ficheiroFinal.append("    int[] v = new int[s.length() + 1];\n");
             ficheiroFinal.append("    for (int i = 0; i < s.length(); i++) {\n");
@@ -56,16 +70,28 @@ public class CodeGenerator {
             ficheiroFinal.append("    v[s.length()] = 0;\n");
             ficheiroFinal.append("    return v;\n");
             ficheiroFinal.append("  }\n\n");
+        }
 
+        if (usaHelperImprimirString) {
             ficheiroFinal.append("  public static void imprimirStringVetor(int[] v) {\n");
             ficheiroFinal.append("    for (int i = 0; i < v.length && v[i] != 0; i++) {\n");
             ficheiroFinal.append("      System.out.print((char) v[i]);\n");
             ficheiroFinal.append("    }\n");
             ficheiroFinal.append("  }\n\n");
-            // ------------------------------------
         }
 
-        // Colamos o corpo do programa logo a seguir às funções auxiliares
+        if (usaHelperImprimirVetor) {
+            ficheiroFinal.append("  public static void imprimirVetor(int[] v) {\n");
+            ficheiroFinal.append("    System.out.print(\"{\");\n");
+            ficheiroFinal.append("    for (int i = 0; i < v.length; i++) {\n");
+            ficheiroFinal.append("      if (i > 0) System.out.print(\",\");\n");
+            ficheiroFinal.append("      System.out.print(v[i]);\n");
+            ficheiroFinal.append("    }\n");
+            ficheiroFinal.append("    System.out.print(\"}\");\n");
+            ficheiroFinal.append("  }\n\n");
+        }
+
+        // Colamos o corpo do programa logo a seguir às funções auxiliares (se existirem)
         ficheiroFinal.append(corpoDoPrograma);
 
         ficheiroFinal.append("}\n");
@@ -164,7 +190,7 @@ public class CodeGenerator {
         }
     }
 
-    // ---------- INSTRUÇÕES (CORRIGIDO) ----------
+    // ---------- INSTRUÇÕES ----------
     private void gerarInstrucao(ASTNode node) {
         if (node == null) return;
         if (node instanceof DeclaracaoNode) {
@@ -178,7 +204,6 @@ public class CodeGenerator {
         } else if (node instanceof ParaNode) {
             gerarFor((ParaNode) node);
         } else {
-            // Qualquer outra coisa é uma expressão (atribuição, chamada, etc.)
             tab();
             gerarExpressao(node);
             sb.append(";\n");
@@ -231,18 +256,15 @@ public class CodeGenerator {
     private void gerarReturn(RetornarNode ret) {
         tab();
 
-        // Se estivermos na principal, traduzimos para System.exit()
         if (this.inMain) {
             if (ret.getExpressao() != null) {
                 sb.append("System.exit(");
                 gerarExpressao(ret.getExpressao());
                 sb.append(");\n");
             } else {
-                sb.append("return;\n"); // Se for só um 'retornar;' sem valor
+                sb.append("return;\n");
             }
-        }
-        // Se for numa função normal, traduzimos para o return clássico
-        else {
+        } else {
             sb.append("return");
             if (ret.getExpressao() != null) {
                 sb.append(" ");
@@ -391,31 +413,30 @@ public class CodeGenerator {
 
         switch (nome) {
             case "ler":
-                usaStrings = true; // Ativa a flag
+                usaScanner = true;
                 sb.append("scanner.nextInt()");
                 break;
             case "lerc":
-                usaStrings = true; // Ativa a flag
+                usaScanner = true;
                 sb.append("scanner.next().charAt(0)");
                 break;
             case "lers":
-                usaStrings = true; // Ativa a flag
+                usaScanner = true;
+                usaHelperLerString = true; // Só precisamos da injeção de leitura!
                 sb.append("lerStringParaVetor(scanner.next())");
                 break;
             case "escrever":
-                usaStrings = true; // Ativa a flag
                 sb.append("System.out.print(");
                 if (!args.isEmpty()) gerarExpressao(args.get(0));
                 sb.append(")");
                 break;
             case "escreverc":
-                usaStrings = true; // Ativa a flag
                 sb.append("System.out.print((char)(");
                 if (!args.isEmpty()) gerarExpressao(args.get(0));
                 sb.append("))");
                 break;
             case "escreverv":
-                usaStrings = true; // Ativa a flag
+                usaHelperImprimirVetor = true; // Só precisamos da injeção de imprimir vetor numérico!
                 if (!args.isEmpty()) {
                     sb.append("imprimirVetor(");
                     gerarExpressao(args.get(0));
@@ -423,7 +444,6 @@ public class CodeGenerator {
                 }
                 break;
             case "escrevers":
-                usaStrings = true; // Ativa a flag
                 if (!args.isEmpty()) {
                     ASTNode arg = args.get(0);
                     if (arg instanceof LiteralStringNode) {
@@ -431,6 +451,7 @@ public class CodeGenerator {
                         gerarExpressao(arg);
                         sb.append(")");
                     } else {
+                        usaHelperImprimirString = true; // Só precisamos da injeção de imprimir strings via vetor de ASCII!
                         sb.append("imprimirStringVetor(");
                         gerarExpressao(arg);
                         sb.append(")");
