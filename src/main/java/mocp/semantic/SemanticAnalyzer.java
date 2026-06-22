@@ -211,6 +211,12 @@ public class SemanticAnalyzer {
                 validarNo(funcao.getBloco());
             }
         }
+        // Verifica se funções não-vazias têm um 'retornar' ---
+        if (!tipoFuncaoAtual.equals("vazio") && funcao.getBloco() != null) {
+            if (!temInstrucaoRetorno(funcao.getBloco())) {
+                reportarErro("A função '" + nome + "' tem o tipo de retorno '" + tipoFuncaoAtual + "', mas não possui nenhuma instrução 'retornar'!");
+            }
+        }
 
         tabelaSimbolos.exitScope();
         tipoFuncaoAtual = "";
@@ -340,5 +346,26 @@ public class SemanticAnalyzer {
 
     public boolean houveErros() {
         return numErros > 0;
+    }
+
+    // Função auxiliar para procurar se existe um RetornarNode algures no bloco
+    private boolean temInstrucaoRetorno(ASTNode no) {
+        if (no == null) return false;
+        if (no instanceof RetornarNode) return true;
+
+        if (no instanceof AfirmacaoCompostaNode) {
+            for (ASTNode instr : ((AfirmacaoCompostaNode) no).getInstrucoes()) {
+                if (temInstrucaoRetorno(instr)) return true;
+            }
+        } else if (no instanceof SeNode) {
+            SeNode seNode = (SeNode) no;
+            // Verifica no if ou no else
+            return temInstrucaoRetorno(seNode.getBlocoSe()) || temInstrucaoRetorno(seNode.getBlocoSenao());
+        } else if (no instanceof EnquantoNode) {
+            return temInstrucaoRetorno(((EnquantoNode) no).getCorpo());
+        } else if (no instanceof ParaNode) {
+            return temInstrucaoRetorno(((ParaNode) no).getCorpo());
+        }
+        return false;
     }
 }

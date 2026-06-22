@@ -1,4 +1,5 @@
-vazio principal() {
+inteiro principal() {
     inteiro x = 5;
     inteiro y = 3;
+    retornar 1;
 }
