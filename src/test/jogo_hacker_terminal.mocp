@@ -1,5 +1,5 @@
 /* ==========================================================
- * TERMINAL HACKER MOCP v1.0
+ * MODULO DE ENCRIPTACAO MOCP v1.0
  * ==========================================================
  * Este programa testa todas as funcionalidades do compilador:
  * - Tree-Shaking (Injeção de Helpers e Scanner)
@@ -21,9 +21,9 @@ real versao = 2.5;
 
 vazio cabecalho(vazio) {
     escrevers("\n====================================\n");
-    escrevers("       TERMINAL HACKER MOCP v");
+    escrevers("    MODULO DE ENCRIPTACAO MOCP v");
 
-    // Cast de real para inteiro só para provar que o compilador sabe fazer!
+    // Cast de real para inteiro só para testar a tradução nativa do compilador
     escrever((inteiro)versao);
 
     escrevers(".0\n");
@@ -48,54 +48,54 @@ inteiro principal(vazio) {
 
     cabecalho();
 
-    escrevers("Introduz o teu nome de agente (1 palavra): ");
+    escrevers("Introduza o seu identificador (1 palavra): ");
     nome = lers(); // [!] ATIVA: usaScanner e usaHelperLerString
 
-    escrevers("\nBem-vindo, agente ");
+    escrevers("\nSessao iniciada para o utilizador: ");
     escrevers(nome); // [!] ATIVA: usaHelperImprimirString
-    escrevers("!\n");
+    escrevers("\n");
 
-    escrevers("Queres hackear a firewall da universidade? (S/N): ");
+    escrevers("Deseja inicializar o protocolo de seguranca? (S/N): ");
     carac = lerc(); // [!] ATIVA: usaScanner
 
     se (carac == 'S' || carac == 's') {
-        escrevers("\n[!] Acesso Autorizado [!]\n");
+        escrevers("\n[+] Protocolo Autorizado [+]\n");
 
-        escrevers("Introduz uma semente (numero inteiro) para gerar a chave: ");
+        escrevers("Insira a semente criptografica (numero inteiro): ");
         semente = ler(); // [!] ATIVA: usaScanner
 
-        // Preenche o vetor com alguma matemática divertida
+        // Preenche o vetor com a geração matemática de chaves
         para (i = 0; i < 5; i = i + 1) {
             vetor_codigos[i] = (semente * (i + 1)) - (i * 2);
         }
 
-        escrevers("Gerando sequencia de acesso remoto: ");
+        escrevers("Vetor de inicializacao gerado: ");
         escreverv(vetor_codigos); // [!] ATIVA: usaHelperImprimirVetor
         escrevers("\n");
 
-        escrevers("Introduz uma palavra-passe secreta para ocultar: ");
+        escrevers("Introduza a palavra-passe a encriptar: ");
         inteiro password[];
         password = lers();
 
         // Passamos o vetor por referência (o C/MOCP e o Java funcionam igual aqui)
         cifrar(password, chave_secreta);
 
-        escrevers("A transmitir pacote encriptado: ");
+        escrevers("Pacote de dados encriptado: ");
         escrevers(password);
         escrevers("\n");
 
-        escrevers("A apagar os rastos...\n");
+        escrevers("Transmissao concluida com sucesso.\n");
 
     } senao {
         // Se a pessoa meter um caractere diferente
-        escrevers("\n[!] Missao Abortada. Es um cobarde, agente ");
+        escrevers("\n[-] Operacao cancelada pelo utilizador ");
         escrevers(nome);
         escrevers(".\n");
     }
 
     // Para mostrar um caracter individual e testar o escreverc()
-    escrevers("\nStatus final de ligacao: ");
-    escreverc('X');
+    escrevers("\nStatus do sistema: ");
+    escreverc('K');
     escrevers("\n");
 
     // [!] ATIVA: O nosso mapeamento brutal para System.exit(0)
